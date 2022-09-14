@@ -55,7 +55,7 @@ class member:
         )
 
     def get_parameters(self, id) -> list:
-        if self.constraints[id]==1:
+        if self.constraints[id] == 1:
             return [self.A, self.B, self.C, self.D]
         else:
             return [self.C, self.D, self.A, self.B]

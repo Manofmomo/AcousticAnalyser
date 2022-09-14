@@ -51,7 +51,7 @@ class structure:
         return inner1
 
     def _get_constraint_id(self):
-        return self.constraints_count+1
+        return self.constraints_count + 1
 
     @_add_constraint
     def free_end(self, member: member_type) -> tuple:
@@ -68,7 +68,10 @@ class structure:
         self, theta: float, member_1: member_type, member_2: member_type
     ) -> tuple:
         rigid_joint_obj = joint.two_member(
-            theta=theta, member_1=member_1, member_2=member_2, id=self._get_constraint_id()
+            theta=theta,
+            member_1=member_1,
+            member_2=member_2,
+            id=self._get_constraint_id(),
         )
         return rigid_joint_obj
 

@@ -3,6 +3,76 @@ from sympy import I
 import pickle 
 
 
+def get_equation_free_end():
+    
+    x = sympy.symbols("x")
+    w = sympy.symbols("w")
+    rho1, Area1, E1, I1 = sympy.symbols("rho1, Area1, E1, I1")
+
+    k1 = (rho1*Area1/(E1*I1))**(0.25)*(w**0.5)
+
+    c1, d1= sympy.symbols("c_traveling, d_traveling")
+    c2, d2= sympy.symbols("c_evanescent, d_evanescent")
+    params = [(c1, d1),(c2, d2)]
+
+    travelling_wave = sympy.exp(-I*k1*x)
+    evanescent_wave = sympy.exp(-1*k1*x)
+    waves = [travelling_wave,evanescent_wave]
+
+    final_equations = []
+
+    for i in range(2):
+        incoming_wave = waves[i]
+        c,d = params[i]
+
+        v = incoming_wave + c*sympy.exp(I*k1*x) + d*sympy.exp(k1*x)
+        vdiffs= [None]*4
+        vdiffs[0] = v
+        for i in range(3):
+            vdiffs[i+1] = sympy.diff(vdiffs[i],x)
+        
+        eq1 = vdiffs[2]
+        eq2 = vdiffs[3]
+        
+        final_equations.append([eq1,eq2])
+
+    return final_equations
+
+def get_equation_fixed_end():
+    
+    x = sympy.symbols("x")
+    w = sympy.symbols("w")
+    rho1, Area1, E1, I1 = sympy.symbols("rho1, Area1, E1, I1")
+
+    k1 = (rho1*Area1/(E1*I1))**(0.25)*(w**0.5)
+
+    c1, d1= sympy.symbols("c_traveling, d_traveling")
+    c2, d2= sympy.symbols("c_evanescent, d_evanescent")
+    params = [(c1, d1),(c2, d2)]
+
+    travelling_wave = sympy.exp(-I*k1*x)
+    evanescent_wave = sympy.exp(-1*k1*x)
+    waves = [travelling_wave,evanescent_wave]
+
+    final_equations = []
+
+    for i in range(2):
+        incoming_wave = waves[i]
+        c,d = params[i]
+
+        v = incoming_wave + c*sympy.exp(I*k1*x) + d*sympy.exp(k1*x)
+        vdiffs= [None]*4
+        vdiffs[0] = v
+        for i in range(3):
+            vdiffs[i+1] = sympy.diff(vdiffs[i],x)
+        
+        eq1 = vdiffs[0]
+        eq2 = vdiffs[1]
+        
+        final_equations.append([eq1,eq2])
+
+    return final_equations
+
 def get_equation_cross():
     
     x = sympy.symbols("x")
@@ -49,3 +119,16 @@ if __name__ == "__main__":
     filehandler = open('equations/cross_section', 'wb') 
     pickle.dump(obj, filehandler)
     filehandler.close()
+    print("Cross Section equations saved")
+
+    obj = get_equation_free_end()
+    filehandler = open('equations/free_end', 'wb') 
+    pickle.dump(obj, filehandler)
+    filehandler.close()
+    print("Free end equations saved")
+
+    obj = get_equation_fixed_end()
+    filehandler = open('equations/fixed_end', 'wb') 
+    pickle.dump(obj, filehandler)
+    filehandler.close()
+    print("Fixed End equations saved")

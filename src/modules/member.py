@@ -32,24 +32,30 @@ class member:
         self.member_number = member_number
         self.omega = omega
 
-        self.joint_count = 0
+        self.constraint_count = 0
+        self.constraints = {}
 
         self.set_parameters()
-        self.set_equation()
 
-    def check_joint_count(self) -> bool:
-        if self.joint_count < 2:
+    def check_constraint_count(self) -> bool:
+        if self.constraint_count < 2:
             return True
         else:
             return False
 
-    def increment_joint_count(self):
-        self.joint_count = self.joint_count + 1
+    def increment_constraint_count(self):
+        self.constraint_count = self.constraint_count + 1
+
+    def add_constraint(self, id):
+        self.constraints[id] = self.constraint_count
 
     def set_parameters(self) -> None:
         self.A, self.B, self.C, self.D = symbols(
             "A{i}, B{i}, C{i}, D{i}".format(i=self.member_number)
         )
 
-    def get_parameters(self) -> list:
-        return [self.A, self.B, self.C, self.D]
+    def get_parameters(self, id) -> list:
+        if self.constraints[id]==1:
+            return [self.A, self.B, self.C, self.D]
+        else:
+            return [self.C, self.D, self.A, self.B]

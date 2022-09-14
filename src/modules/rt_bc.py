@@ -2,8 +2,8 @@ from sympy import symbols, I,solve, Matrix
 from pickle import load as pickle_load
 from src.modules.member import member as member_type
 
-c1, d1= symbols("a_traveling,  b_traveling, c_traveling, d_traveling")
-c2, d2= symbols("a_evanescent, b_evanescent, c_evanescent, d_evanescent")
+c1, d1= symbols("c_traveling, d_traveling")
+c2, d2= symbols("c_evanescent, d_evanescent")
 rho1, Area1, E1, I1 = symbols("rho1, Area1, E1, I1")
 
 def _subs(eqns: list, m1: member_type) -> list:

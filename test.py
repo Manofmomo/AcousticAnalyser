@@ -12,4 +12,5 @@ j2,_ =test_structure.two_member_joint(member_1=m2, member_2=m3, theta=0)
 
 _ = test_structure.free_end(member=m3)
 
-lhs,rhs=test_structure.get_equation_matrix()
+lhs=test_structure.get_equation_matrix()
+print(lhs)

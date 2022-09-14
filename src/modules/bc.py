@@ -9,13 +9,15 @@ class bc:
         if not member.check_constraint_count():
             raise Exception(f"Member {member.member_number} already has 2 joints/BCs")
         member.increment_constraint_count()
+        member.add_constraint(id=id)
         self.member = member
         self.id = id
 
 
+
 class free_end(bc):
-    def __init__(self, member: member_type) -> None:
-        super().__init__(member=member)
+    def __init__(self, member: member_type, id: int) -> None:
+        super().__init__(member=member, id=id)
         self.reflection_matrix = get_r_of_free_end(m1=member)
 
     def get_equations(self) -> list:  # TODO add type
@@ -28,8 +30,8 @@ class free_end(bc):
 
 
 class fixed_end(bc):
-    def __init__(self, member: member_type) -> None:
-        super().__init__(member=member)
+    def __init__(self, member: member_type, id: int) -> None:
+        super().__init__(member=member, id=id)
         self.reflection_matrix = get_r_of_fixed_end(m1=member)
 
     def get_equations(self) -> list:  # TODO add type

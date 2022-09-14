@@ -80,11 +80,11 @@ class structure:
         for constraint in self.constraints:
             eqns.extend(constraint.get_equations())
 
-        for member in self.members:
-            params.extend(member.get_parameters())
+        # for member in self.members:
+        #     params.extend(member.get_parameters())
 
-        for lhs in eqns:
-            lhs_list.append(get_coefficients(lhs, params))
-            # rhs_list.append(rhs)
+        # for lhs in eqns:
+        #     lhs_list.append(get_coefficients(lhs, params))
+        #     # rhs_list.append(rhs)
 
-        return (Matrix(lhs_list), Matrix(rhs_list))
+        return eqns

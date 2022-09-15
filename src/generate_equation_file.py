@@ -31,8 +31,8 @@ def get_equation_free_end():
         for i in range(3):
             vdiffs[i + 1] = sympy.diff(vdiffs[i], x)
 
-        eq1 = vdiffs[2].subs(x,0)
-        eq2 = vdiffs[3].subs(x,0)
+        eq1 = vdiffs[2].subs(x, 0)
+        eq2 = vdiffs[3].subs(x, 0)
 
         final_equations.append([eq1, eq2])
 
@@ -67,14 +67,15 @@ def get_equation_fixed_end():
         for i in range(3):
             vdiffs[i + 1] = sympy.diff(vdiffs[i], x)
 
-        eq1 = vdiffs[0].subs(x,0)
-        eq2 = vdiffs[1].subs(x,0)
+        eq1 = vdiffs[0].subs(x, 0)
+        eq2 = vdiffs[1].subs(x, 0)
 
         final_equations.append([eq1, eq2])
 
     return final_equations
 
 
+# Assuming Wave equation to be A*e^(-I*k*x) + B*e^(-k*x) + C*e^(I*k*x) + D*e^(k*x)
 def get_equation_cross():
 
     x = sympy.symbols("x")

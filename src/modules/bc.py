@@ -4,6 +4,7 @@ from sympy import Matrix
 
 
 class bc:
+    # This class emulates a boundary condition that can be added to members
     def __init__(self, member: member_type, id: int) -> None:
         if type(member) != member_type:
             raise Exception("members must belong to class Member")
@@ -16,13 +17,15 @@ class bc:
 
 
 class free_end(bc):
+    # This is a free end boundary condition
     def __init__(self, member: member_type, id: int) -> None:
         super().__init__(member=member, id=id)
         self.reflection_matrix = get_r_of_free_end(m1=member)
 
-    def get_equations(self) -> list:  # TODO add type
-        # Assuming Wave equation to be A*e^(-I*k*x) + B*e^(-k*x) + C*e^(I*k*x) + D*e^(k*x)
-        a1, b1, c1, d1 = self.member.get_parameters(id=self.id)
+    def get_equations(self) -> list:
+        a1, b1, c1, d1 = self.member.get_parameters(
+            id=self.id
+        )  # joint_id has to be used when accessing member parameters
 
         eqns = self.reflection_matrix * Matrix([c1, d1]) - Matrix([a1, b1])
 
@@ -34,8 +37,7 @@ class fixed_end(bc):
         super().__init__(member=member, id=id)
         self.reflection_matrix = get_r_of_fixed_end(m1=member)
 
-    def get_equations(self) -> list:  # TODO add type
-        # Assuming Wave equation to be A*e^(-I*k*x) + B*e^(-k*x) + C*e^(I*k*x) + D*e^(k*x)
+    def get_equations(self) -> list:
         a1, b1, c1, d1 = self.member.get_parameters(id=self.id)
 
         eqns = self.reflection_matrix * Matrix([c1, d1]) - Matrix([a1, b1])

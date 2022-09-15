@@ -2,6 +2,7 @@ from sympy import symbols
 
 
 class member:
+    # This class emulates a member with all its physical properties
     def __init__(
         self,
         length: float,
@@ -10,7 +11,7 @@ class member:
         youngs_modulus: float,
         inertia: float,
         omega: symbols,
-        member_number: int,
+        id: int,
     ) -> None:
         if length <= 0:
             raise ValueError("length must be greater than 0")
@@ -29,7 +30,7 @@ class member:
         self.youngs_modulus = youngs_modulus
         self.inertia = inertia
 
-        self.member_number = member_number
+        self.id = id
         self.omega = omega
 
         self.constraint_count = 0
@@ -38,6 +39,7 @@ class member:
         self.set_parameters()
 
     def check_constraint_count(self) -> bool:
+        # Each member can have only 2 constraints added to it at present
         if self.constraint_count < 2:
             return True
         else:
@@ -51,10 +53,13 @@ class member:
 
     def set_parameters(self) -> None:
         self.A, self.B, self.C, self.D = symbols(
-            "A{i}, B{i}, C{i}, D{i}".format(i=self.member_number)
+            "A{i}, B{i}, C{i}, D{i}".format(i=self.id)
         )
 
     def get_parameters(self, id) -> list:
+        # This function gives back the set of parameters to be used.
+        # It corrects for the orientation of the joint when returning parameters
+        # from the on
         if self.constraints[id] == 1:
             return [self.A, self.B, self.C, self.D]
         else:

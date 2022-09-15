@@ -5,6 +5,7 @@ from typing import List
 
 
 class joint:
+    # This class emulates a joint that can be added to members
     force = 0.0
     k_spring = 0.0
 
@@ -34,6 +35,7 @@ class joint:
 
 
 class two_member(joint):
+    # This class emulates a two-member joint that uses the Euler theory
     def __init__(
         self, theta: float, member_1: member_type, member_2: member_type, id: int
     ) -> None:
@@ -46,8 +48,7 @@ class two_member(joint):
         )
 
     def get_equations(self) -> list:
-        # Assuming Wave equation to be A*e^(-I*k*x) + B*e^(-k*x) + C*e^(I*k*x) + D*e^(k*x)
-        # Assuming
+        # Gets the equations from the reflection and transmission matrices
         c1, d1, a1, b1 = self.members[0].get_parameters(id=self.id)
         a2, b2, _, _ = self.members[1].get_parameters(id=self.id)
 

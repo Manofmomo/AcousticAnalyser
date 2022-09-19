@@ -13,8 +13,8 @@ def get_coefficients(eqn: equation_type, params: list) -> list:
     return coeffs
 
 
-class structure:
-    # This class emulates a mechanical structure consisting of joints and members
+class frame:
+    # This class emulates a mechanical frame consisting of joints and members
     # It is the class the user directly interacts with
     def __init__(self) -> None:
         self.members = []

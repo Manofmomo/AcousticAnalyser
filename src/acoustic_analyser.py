@@ -6,6 +6,7 @@ from src.modules.member import member as member_type
 from json import load as json_load
 from csv import reader as csv_load
 
+
 def get_coefficients(eqn: equation_type, params: list) -> list:
     # This is intended to extract the coefficients given an equation and the variables
     eqn = eqn.expand()
@@ -28,24 +29,26 @@ class frame:
     def from_file(cls, member_file: str, constraint_file: str):
         obj = cls()
 
-        with open(member_file, 'r') as jsonfile:
+        with open(member_file, "r") as jsonfile:
             member_dict = json_load(jsonfile)
-            counter=0
+            counter = 0
             for member_id, member_deets in member_dict.items():
-                assert int(member_id)==counter, "ID format is not followed"
+                assert int(member_id) == counter, "ID format is not followed"
                 obj.add_member(id=int(member_id), **member_deets)
-                counter = counter+1
-            
-        with open(constraint_file, 'r') as csvfile:
+                counter = counter + 1
+
+        with open(constraint_file, "r") as csvfile:
             constraints = csv_load(csvfile)
             for m1_id, row in enumerate(constraints):
                 for m2_id, val in enumerate(row):
-                    if int(val)==-1:
+                    if int(val) == -1:
                         continue
 
-                    print(m1_id,m2_id)
+                    print(m1_id, m2_id)
                     # For >2 member joints, we can add a condition to check how many joints are there and appropriately select function
-                    obj.two_member_joint(theta=float(val), member_1_id=int(m1_id), member_2_id=int(m2_id))
+                    obj.two_member_joint(
+                        theta=float(val), member_1_id=int(m1_id), member_2_id=int(m2_id)
+                    )
 
         return obj
 
@@ -56,7 +59,7 @@ class frame:
         cross_section_area: float,
         youngs_modulus: float,
         inertia: float,
-        id: int
+        id: int,
     ) -> member_type:
         # This function allows the user to add a member to the structure
         member_obj = member_type(
@@ -68,7 +71,7 @@ class frame:
             omega=self.omega,
             id=id,
         )
-        self.members[id]=member_obj
+        self.members[id] = member_obj
         return member_obj
 
     def _add_constraint(func):
@@ -89,12 +92,16 @@ class frame:
     # Here the joints/BCs are defined
     @_add_constraint
     def free_end(self, member_id: int) -> bc:
-        free_end_obj = bc.free_end(member=self.members[member_id], id=self._get_constraint_id())
+        free_end_obj = bc.free_end(
+            member=self.members[member_id], id=self._get_constraint_id()
+        )
         return free_end_obj
 
     @_add_constraint
     def fixed_end(self, member_id: int) -> bc:
-        fixed_end_obj = bc.fixed_end(member=self.members[member_id], id=self._get_constraint_id())
+        fixed_end_obj = bc.fixed_end(
+            member=self.members[member_id], id=self._get_constraint_id()
+        )
         return fixed_end_obj
 
     @_add_constraint

@@ -4,6 +4,7 @@ import pickle
 
 # This initial code is developed using Euler-Bernoulli beam mode
 
+
 def get_equation_free_end():
 
     x = sympy.symbols("x")

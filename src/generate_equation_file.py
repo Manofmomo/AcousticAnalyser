@@ -2,6 +2,7 @@ import sympy
 from sympy import I
 import pickle
 
+# This initial code is developed using Euler-Bernoulli beam mode
 
 def get_equation_free_end():
 

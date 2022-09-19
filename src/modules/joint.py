@@ -15,7 +15,7 @@ class joint:
                 raise Exception("members must belong to class Member")
             if not member.check_constraint_count():
                 raise Exception(
-                    f"Member {member.member_number} already has 2 joints/BCs"
+                    f"Member {member.id} already has 2 joints/BCs"
                 )
         for member in members:
             member.increment_constraint_count()

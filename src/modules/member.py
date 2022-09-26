@@ -60,11 +60,14 @@ class member:
         self.a_plus = Matrix([a_b_plus, a_e_plus, a_l_plus])
         self.a_minus = Matrix([a_b_minus, a_e_minus, a_l_minus])
 
+        self.b_plus = self.a_plus # Have to add propagation matrices
+        self.b_minus = self.a_minus
+
     def get_parameters(self, id: int = None) -> list:
         # This function gives back the set of parameters to be used.
         # It corrects for the sign convention of the constraint when returning parameters
         # Positive direction is from lower to higher constraint id
         if id == max(self.constraint_ids):
-            return [self.a_minus, self.a_plus]
+            return [self.b_minus, self.b_plus]
         else:
             return [self.a_plus, self.a_minus]

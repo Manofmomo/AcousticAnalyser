@@ -2,14 +2,13 @@ from src.modules.member import member as member_type
 from src.modules.rt_joint import get_rt_of_cross_section
 from sympy import Matrix
 from typing import List
+from math import pi
 
 
 class joint:
     # This class emulates a joint that can be added to members
-    force = 0.0
-    k_spring = 0.0
 
-    def __init__(self, members: list, id: int) -> None:
+    def __init__(self, members: List[member_type], id: int) -> None:
         for member in members:
             if type(member) != member_type:
                 raise Exception("members must belong to class Member")
@@ -22,22 +21,13 @@ class joint:
         self.members: List[member_type] = members
         self.id = id
 
-    def add_spring(self, k_spring: float) -> None:
-        if k_spring <= 0:
-            raise Exception("k_spring must be greater than 0")
-
-        self.k_spring = k_spring
-
-    def add_force(self, F: float) -> None:
-        self.force = F
-
 
 class two_member(joint):
-    # This class emulates a two-member joint that uses the Euler theory
+    # This class emulates a two-member joint
     def __init__(
         self, theta: float, member_1: member_type, member_2: member_type, id: int
     ) -> None:
-        self.theta = theta
+        self.theta = theta * pi / 180  # Degree to radians
         self.member_joint_type = []
         members = [member_1, member_2]
         super().__init__(members=members, id=id)
@@ -47,11 +37,19 @@ class two_member(joint):
 
     def get_equations(self) -> list:
         # Gets the equations from the reflection and transmission matrices
-        c1, d1, a1, b1 = self.members[0].get_parameters(id=self.id)
-        a2, b2, _, _ = self.members[1].get_parameters(id=self.id)
+        a_plus, a_minus = self.members[0].get_parameters(id=self.id)
+        b_plus, b_minus = self.members[1].get_parameters(id=self.id)
 
-        matrix_reflect = self.reflection_matrix * Matrix([a1, b1]) - Matrix([c1, d1])
-        matrix_transmit = self.transmission_matrix * Matrix([a1, b1]) - Matrix([a2, b2])
+        matrix_reflect = (
+            self.reflection_matrix * a_plus
+            + self.transmission_matrix * b_minus
+            - a_minus
+        )
+        matrix_transmit = (
+            self.transmission_matrix * a_plus
+            + self.reflection_matrix * b_minus
+            - b_plus
+        )
         eqns = matrix_reflect.col_join(matrix_transmit)
 
         return eqns

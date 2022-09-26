@@ -1,4 +1,4 @@
-from sympy import symbols
+from sympy import symbols, Matrix
 
 
 class member:
@@ -34,7 +34,7 @@ class member:
         self.omega = omega
 
         self.constraint_count = 0
-        self.constraints = {}
+        self.constraint_ids = []
 
         self.set_parameters()
 
@@ -49,18 +49,22 @@ class member:
         self.constraint_count = self.constraint_count + 1
 
     def add_constraint(self, id):
-        self.constraints[id] = self.constraint_count
+        self.constraint_ids.append(id)
 
     def set_parameters(self) -> None:
-        self.A, self.B, self.C, self.D = symbols(
-            "A{i}, B{i}, C{i}, D{i}".format(i=self.id)
+        a_b_plus, a_e_plus, a_b_minus, a_e_minus, a_l_plus, a_l_minus = symbols(
+            "a_b^+{i}, a_e^+{i}, a_b^-{i}, a_e^-{i}, a_l^+{i}, a_l^-{i}".format(
+                i=self.id
+            )
         )
+        self.a_plus = Matrix([a_b_plus, a_e_plus, a_l_plus])
+        self.a_minus = Matrix([a_b_minus, a_e_minus, a_l_minus])
 
-    def get_parameters(self, id) -> list:
+    def get_parameters(self, id: int = None) -> list:
         # This function gives back the set of parameters to be used.
-        # It corrects for the orientation of the joint when returning parameters
-        # from the on
-        if self.constraints[id] == 1:
-            return [self.A, self.B, self.C, self.D]
+        # It corrects for the sign convention of the constraint when returning parameters
+        # Positive direction is from lower to higher constraint id
+        if id == max(self.constraint_ids):
+            return [self.a_minus, self.a_plus]
         else:
-            return [self.C, self.D, self.A, self.B]
+            return [self.a_plus, self.a_minus]

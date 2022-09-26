@@ -1,4 +1,5 @@
 from locale import MON_1
+from zipfile import ZIP_DEFLATED
 import sympy
 from sympy import I
 import pickle
@@ -12,14 +13,14 @@ def get_equation_free_end():
     w = sympy.symbols("w")
     rho1, area1, E1, I1 = sympy.symbols("rho1, area1, E1, I1")
 
-    k1 = (rho1 * area1 / (E1 * I1)) ** (0.25) * (w**0.5)
+    K1 = (rho1 * area1 / (E1 * I1)) ** (0.25) * (w**0.5)
 
     c1, d1 = sympy.symbols("c_traveling, d_traveling")
     c2, d2 = sympy.symbols("c_evanescent, d_evanescent")
     params = [(c1, d1), (c2, d2)]
 
-    travelling_wave = sympy.exp(-I * k1 * x)
-    evanescent_wave = sympy.exp(-1 * k1 * x)
+    travelling_wave = sympy.exp(-I * K1 * x)
+    evanescent_wave = sympy.exp(-1 * K1 * x)
     waves = [travelling_wave, evanescent_wave]
 
     final_equations = []
@@ -28,7 +29,7 @@ def get_equation_free_end():
         incoming_wave = waves[i]
         c, d = params[i]
 
-        v = incoming_wave + c * sympy.exp(I * k1 * x) + d * sympy.exp(k1 * x)
+        v = incoming_wave + c * sympy.exp(I * K1 * x) + d * sympy.exp(K1 * x)
         vdiffs = [None] * 4
         vdiffs[0] = v
         for i in range(3):
@@ -48,14 +49,14 @@ def get_equation_fixed_end():
     w = sympy.symbols("w")
     rho1, area1, E1, I1 = sympy.symbols("rho1, area1, E1, I1")
 
-    k1 = (rho1 * area1 / (E1 * I1)) ** (0.25) * (w**0.5)
+    K1 = (rho1 * area1 / (E1 * I1)) ** (0.25) * (w**0.5)
 
     c1, d1 = sympy.symbols("c_traveling, d_traveling")
     c2, d2 = sympy.symbols("c_evanescent, d_evanescent")
     params = [(c1, d1), (c2, d2)]
 
-    travelling_wave = sympy.exp(-I * k1 * x)
-    evanescent_wave = sympy.exp(-1 * k1 * x)
+    travelling_wave = sympy.exp(-I * K1 * x)
+    evanescent_wave = sympy.exp(-1 * K1 * x)
     waves = [travelling_wave, evanescent_wave]
 
     final_equations = []
@@ -64,7 +65,7 @@ def get_equation_fixed_end():
         incoming_wave = waves[i]
         c, d = params[i]
 
-        v = incoming_wave + c * sympy.exp(I * k1 * x) + d * sympy.exp(k1 * x)
+        v = incoming_wave + c * sympy.exp(I * K1 * x) + d * sympy.exp(K1 * x)
         vdiffs = [None] * 4
         vdiffs[0] = v
         for i in range(3):
@@ -80,29 +81,22 @@ def get_equation_fixed_end():
 
 # Assuming Wave equation to be A*e^(-I*k*x) + B*e^(-k*x) + C*e^(I*k*x) + D*e^(k*x)
 def get_equation_cross():
-    w = sympy.symbols("omega")
 
-    rho1, area1, E1, I1, H1 = sympy.symbols("rho1, area1, E1, I1, H1")
-    K1 = (rho1 * area1 / (E1 * I1)) ** (0.25) * (w**0.5)
-    C1 = (E1 / rho1) ** (0.5)
-    alpha1 = (w * K1 / C1) ** (0.5)
-    beta1 = w * K1 / C1
-    temp = 0  # TODO
-    OMEGA = temp
-    zeta = temp
-    theta = temp
+    w = sympy.symbols("w")
+    rho1, area1, E1, I1, L1 = sympy.symbols("rho1, area1, E1, I1, L1")
+
+    H1 = 12 * I1 / (L1**3)
+    C = (E1 / rho1) ** 0.5
+    K1 = (L1 / area1) ** 0.5
+
+    zeta = H1 / K1
+    omega = (w * K1 / C) ** 0.5
+    theta = sympy.symbols("theta")
+
     M1 = sympy.Matrix(
         [
-            [
-                0,
-                0, 
-                zeta * OMEGA - I / OMEGA
-            ],
-            [
-                zeta * OMEGA - I, 
-                zeta * OMEGA + 1,
-                0
-            ],
+            [0, 0, zeta * omega - I / omega],
+            [zeta * omega - I, zeta * omega + 1, 0],
             [
                 1 + 0.5 * I * zeta * sympy.tan(theta / 2),
                 -1 - 0.5 * I * zeta * sympy.tan(theta / 2),
@@ -113,33 +107,29 @@ def get_equation_cross():
 
     M2 = sympy.Matrix(
         [
-            [
-                -I * sympy.sin(theta),
-                sympy.sin(theta), 
-                I * sympy.cos(theta) / OMEGA
-            ],
+            [-I * sympy.sin(theta), sympy.sin(theta), I * sympy.cos(theta) / omega],
             [
                 0.5
                 * I
                 * (
-                    (zeta**2) * (OMEGA**2) * sympy.tan(theta / 2)
+                    (zeta**2) * (omega**2) * sympy.tan(theta / 2)
                     + 2 * sympy.cos(theta)
                 ),
-                0.5 * (zeta**2) * (OMEGA**2) * sympy.tan(theta / 2)
+                0.5 * (zeta**2) * (omega**2) * sympy.tan(theta / 2)
                 - sympy.cos(theta),
-                I * sympy.sin(theta) / OMEGA,
+                I * sympy.sin(theta) / omega,
             ],
             [
                 (1 / 6)
                 * (
-                    I * (zeta**3) * (OMEGA**3)
-                    + 3 * I * zeta * OMEGA * sympy.tan(theta / 2)
+                    I * (zeta**3) * (omega**3)
+                    + 3 * I * zeta * omega * sympy.tan(theta / 2)
                     + 6
                 ),
                 (1 / 6)
                 * (
-                    (zeta**3) * (OMEGA**3)
-                    - 3 * zeta * OMEGA * sympy.tan(theta / 2)
+                    (zeta**3) * (omega**3)
+                    - 3 * zeta * omega * sympy.tan(theta / 2)
                     - 6
                 ),
                 0,
@@ -149,34 +139,30 @@ def get_equation_cross():
 
     M3 = sympy.Matrix(
         [
-            [
-                I * sympy.sin(theta),
-                -sympy.sin(theta),
-                I * sympy.cos(theta) / OMEGA
-            ],
+            [I * sympy.sin(theta), -sympy.sin(theta), I * sympy.cos(theta) / omega],
             [
                 -0.5
                 * I
                 * (
-                    (zeta**2) * (OMEGA**2) * sympy.tan(theta / 2)
+                    (zeta**2) * (omega**2) * sympy.tan(theta / 2)
                     + 2 * sympy.cos(theta)
                 ),
-                -0.5 * (zeta**2) * (OMEGA**2) * sympy.tan(theta / 2)
+                -0.5 * (zeta**2) * (omega**2) * sympy.tan(theta / 2)
                 + sympy.cos(theta),
-                -I * sympy.sin(theta) / OMEGA,
+                -I * sympy.sin(theta) / omega,
             ],
             [
                 -(1 / 6)
                 * I
                 * (
-                    (zeta**3) * (OMEGA**3)
-                    + 3 * zeta * OMEGA * sympy.tan(theta / 2)
+                    (zeta**3) * (omega**3)
+                    + 3 * zeta * omega * sympy.tan(theta / 2)
                     + 6 * I
                 ),
                 (1 / 6)
                 * (
-                    -(zeta**3) * (OMEGA**3)
-                    + 3 * zeta * OMEGA * sympy.tan(theta / 2)
+                    -(zeta**3) * (omega**3)
+                    + 3 * zeta * omega * sympy.tan(theta / 2)
                     - 6
                 ),
                 0,
@@ -191,7 +177,7 @@ def get_equation_cross():
                 -sympy.cos(theta),
             ],
             [
-                -sympy.cos(theta), 
+                -sympy.cos(theta),
                 -sympy.cos(theta),
                 sympy.sin(theta),
             ],
@@ -205,8 +191,8 @@ def get_equation_cross():
     M5 = sympy.Matrix(
         [
             [
-                -I * zeta * OMEGA * (sympy.sin(theta / 2) ** 2),
-                -zeta * OMEGA * (sympy.sin(theta / 2) ** 2),
+                -I * zeta * omega * (sympy.sin(theta / 2) ** 2),
+                -zeta * omega * (sympy.sin(theta / 2) ** 2),
                 -1,
             ],
             [
@@ -224,8 +210,8 @@ def get_equation_cross():
     M6 = sympy.Matrix(
         [
             [
-                I * zeta * OMEGA * (sympy.sin(theta / 2) ** 2),
-                zeta * OMEGA * (sympy.sin(theta / 2) ** 2),
+                I * zeta * omega * (sympy.sin(theta / 2) ** 2),
+                zeta * omega * (sympy.sin(theta / 2) ** 2),
                 -1,
             ],
             [
@@ -241,7 +227,7 @@ def get_equation_cross():
         ]
     )
 
-    return (M1, M2, M3, M4, M5, M6)
+    return [M1, M2, M3, M4, M5, M6]
 
 
 if __name__ == "__main__":

@@ -1,5 +1,10 @@
-from sympy import symbols, Matrix, I
-from numpy import e
+from sympy import symbols, Matrix, I, E
+import logging
+
+logging.basicConfig(
+    level=logging.DEBUG, format="%(asctime)s %(name)s %(levelname)s:%(message)s"
+)
+logger = logging.getLogger(__name__)
 
 
 class member:
@@ -63,11 +68,14 @@ class member:
         L_bar = self.length
 
         self.propagation_matrix = Matrix(
-            [e ** (-I * alpha * L_bar), 0, 0],
-            [0, e ** (-alpha * L_bar), 0],
-            [0, 0, e ** (-I * beta * L_bar)],
+            [
+                [E ** (-I * alpha * L_bar), 0, 0],
+                [0, E ** (-alpha * L_bar), 0],
+                [0, 0, E ** (-I * beta * L_bar)],
+            ]
         )
         self.inv_proagation_matrix = -self.propagation_matrix
+        logger.debug(f"Propagation Matrix Calculated for member {self.id}")
 
     def set_parameters(self) -> None:
         a_b_plus, a_e_plus, a_b_minus, a_e_minus, a_l_plus, a_l_minus = symbols(
@@ -80,6 +88,7 @@ class member:
 
         self.b_plus = self.propagation_matrix * self.a_plus
         self.b_minus = self.inv_proagation_matrix * self.a_minus
+        logger.debug(f"Parameters set for member {self.id}")
 
     def get_parameters(self, id: int = None) -> list:
         # This function gives back the set of parameters to be used.

@@ -5,6 +5,12 @@ from sympy import symbols, Matrix
 from src.modules.member import member as member_type
 from json import load as json_load
 from csv import reader as csv_load
+import logging
+
+logging.basicConfig(
+    level=logging.DEBUG, format="%(asctime)s %(name)s %(levelname)s:%(message)s"
+)
+logger = logging.getLogger(__name__)
 
 
 def get_coefficients(eqn: equation_type, params: list) -> list:
@@ -36,19 +42,18 @@ class frame:
                 assert int(member_id) == counter, "ID format is not followed"
                 obj.add_member(id=int(member_id), **member_deets)
                 counter = counter + 1
-
+        logger.debug("Created all Members")
         with open(constraint_file, "r") as csvfile:
             constraints = csv_load(csvfile)
             for m1_id, row in enumerate(constraints):
                 for m2_id, val in enumerate(row):
                     if int(val) == -1:
                         continue
-
-                    print(m1_id, m2_id)
                     # For >2 member joints, we can add a condition to check how many joints are there and appropriately select function
                     obj.two_member_joint(
                         theta=float(val), member_1_id=int(m1_id), member_2_id=int(m2_id)
                     )
+        logger.debug("Added all Constraints")
 
         return obj
 
@@ -72,6 +77,7 @@ class frame:
             id=id,
         )
         self.members[id] = member_obj
+        logger.debug(f"Member added with id {id}")
         return member_obj
 
     def _add_constraint(func):
@@ -95,6 +101,7 @@ class frame:
         free_end_obj = bc.free_end(
             member=self.members[member_id], id=self._get_constraint_id()
         )
+        logger.debug(f"Free End added to member {member_id}")
         return free_end_obj
 
     @_add_constraint
@@ -102,6 +109,7 @@ class frame:
         fixed_end_obj = bc.fixed_end(
             member=self.members[member_id], id=self._get_constraint_id()
         )
+        logger.debug(f"Fixed End added to member {member_id}")
         return fixed_end_obj
 
     @_add_constraint
@@ -114,6 +122,7 @@ class frame:
             member_2=self.members[member_2_id],
             id=self._get_constraint_id(),
         )
+        logger.debug(f"Two member joint added b/w {member_1_id} and {member_2_id}")
         return rigid_joint_obj
 
     def get_equation_matrix(self):

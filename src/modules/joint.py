@@ -1,8 +1,15 @@
+from asyncio.log import logger
 from src.modules.member import member as member_type
 from src.modules.rt_joint import get_rt_of_cross_section
 from sympy import Matrix
 from typing import List
 from math import pi
+import logging
+
+logging.basicConfig(
+    level=logging.DEBUG, format="%(asctime)s %(name)s %(levelname)s:%(message)s"
+)
+logger = logging.getLogger(__name__)
 
 
 class joint:
@@ -51,5 +58,5 @@ class two_member(joint):
             - b_plus
         )
         eqns = matrix_reflect.col_join(matrix_transmit)
-
+        logger.debug(f"Equations for joint {self.id} calculated")
         return eqns

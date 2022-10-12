@@ -11,9 +11,9 @@ def get_equation_free_end():
 
     x = sympy.symbols("x")
     w = sympy.symbols("w")
-    rho1, area1, E1, I1 = sympy.symbols("rho1, area1, E1, I1")
+    density1, area1, E1, I1 = sympy.symbols("density1, area1, E1, I1")
 
-    K1 = (rho1 * area1 / (E1 * I1)) ** (0.25) * (w**0.5)
+    K1 = (density1 * area1 / (E1 * I1)) ** (0.25) * (w**0.5)
 
     c1, d1 = sympy.symbols("c_traveling, d_traveling")
     c2, d2 = sympy.symbols("c_evanescent, d_evanescent")
@@ -47,9 +47,9 @@ def get_equation_fixed_end():
 
     x = sympy.symbols("x")
     w = sympy.symbols("w")
-    rho1, area1, E1, I1 = sympy.symbols("rho1, area1, E1, I1")
+    density1, area1, E1, I1 = sympy.symbols("density1, area1, E1, I1")
 
-    K1 = (rho1 * area1 / (E1 * I1)) ** (0.25) * (w**0.5)
+    K1 = (density1 * area1 / (E1 * I1)) ** (0.25) * (w**0.5)
 
     c1, d1 = sympy.symbols("c_traveling, d_traveling")
     c2, d2 = sympy.symbols("c_evanescent, d_evanescent")
@@ -83,10 +83,10 @@ def get_equation_fixed_end():
 def get_equation_cross():
 
     w = sympy.symbols("w")
-    rho1, area1, E1, I1, L1 = sympy.symbols("rho1, area1, E1, I1, L1")
+    density1, area1, E1, I1, L1 = sympy.symbols("density1, area1, E1, I1, L1")
 
     H1 = 12 * I1 / (L1**3)
-    C = (E1 / rho1) ** 0.5
+    C = (E1 / density1) ** 0.5
     K1 = (L1 / area1) ** 0.5
 
     zeta = H1 / K1

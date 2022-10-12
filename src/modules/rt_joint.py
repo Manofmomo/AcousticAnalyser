@@ -5,18 +5,18 @@ from typing import List, Tuple
 
 a1, b1, c1, d1 = symbols("a_traveling,  b_traveling, c_traveling, d_traveling")
 a2, b2, c2, d2 = symbols("a_evanescent, b_evanescent, c_evanescent, d_evanescent")
-rho1, Area1, E1, I1 = symbols("rho1, Area1, E1, I1")
-rho2, Area2, E2, I2 = symbols("rho2, Area2, E2, I2")
+density1, Area1, E1, I1 = symbols("density1, Area1, E1, I1")
+density2, Area2, E2, I2 = symbols("density2, Area2, E2, I2")
 theta = symbols("theta")
 
 
 def _subs(eqns: List[Matrix], m1: member_type, m2: member_type, theta: float) -> list:
     subs_dict = {
-        rho1: m1.rho,
+        density1: m1.density,
         Area1: m1.cross_section_area,
         E1: m1.youngs_modulus,
         I1: m1.inertia,
-        rho2: m2.rho,
+        density2: m2.density,
         Area2: m2.cross_section_area,
         E2: m2.youngs_modulus,
         I2: m2.inertia,

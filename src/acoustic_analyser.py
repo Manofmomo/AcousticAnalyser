@@ -55,7 +55,7 @@ class frame:
     def add_member(
         self,
         length: float,
-        rho: float,
+        density: float,
         cross_section_area: float,
         youngs_modulus: float,
         inertia: float,
@@ -64,7 +64,7 @@ class frame:
         # This function allows the user to add a member to the structure
         member_obj = member_type(
             length=length,
-            rho=rho,
+            density=density,
             cross_section_area=cross_section_area,
             youngs_modulus=youngs_modulus,
             inertia=inertia,

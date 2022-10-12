@@ -1,4 +1,5 @@
-from sympy import symbols, Matrix
+from sympy import symbols, Matrix, I
+from numpy import e
 
 
 class member:
@@ -6,7 +7,7 @@ class member:
     def __init__(
         self,
         length: float,
-        rho: float,
+        density: float,
         cross_section_area: float,
         youngs_modulus: float,
         inertia: float,
@@ -15,8 +16,8 @@ class member:
     ) -> None:
         if length <= 0:
             raise ValueError("length must be greater than 0")
-        if rho <= 0:
-            raise ValueError("rho must be greater than 0")
+        if density <= 0:
+            raise ValueError("density must be greater than 0")
         if cross_section_area <= 0:
             raise ValueError("cross_section_area must be greater than 0")
         if youngs_modulus <= 0:
@@ -25,7 +26,7 @@ class member:
             raise ValueError("inertia must be greater than 0")
 
         self.length = length
-        self.rho = rho
+        self.density = density
         self.cross_section_area = cross_section_area
         self.youngs_modulus = youngs_modulus
         self.inertia = inertia
@@ -36,6 +37,7 @@ class member:
         self.constraint_count = 0
         self.constraint_ids = []
 
+        self.set_propagation_matrice()
         self.set_parameters()
 
     def check_constraint_count(self) -> bool:
@@ -51,6 +53,22 @@ class member:
     def add_constraint(self, id):
         self.constraint_ids.append(id)
 
+    def set_propagation_matrice(self):
+        w = symbols("w")
+        C = (self.youngs_modulus / self.density) ** 0.5
+        K = (self.length / self.cross_section_area) ** 0.5
+
+        alpha = (w * K / C) ** 0.5
+        beta = w * K / C
+        L_bar = self.length
+
+        self.propagation_matrix = Matrix(
+            [e ** (-I * alpha * L_bar), 0, 0],
+            [0, e ** (-alpha * L_bar), 0],
+            [0, 0, e ** (-I * beta * L_bar)],
+        )
+        self.inv_proagation_matrix = -self.propagation_matrix
+
     def set_parameters(self) -> None:
         a_b_plus, a_e_plus, a_b_minus, a_e_minus, a_l_plus, a_l_minus = symbols(
             "a_b^+{i}, a_e^+{i}, a_b^-{i}, a_e^-{i}, a_l^+{i}, a_l^-{i}".format(
@@ -60,8 +78,8 @@ class member:
         self.a_plus = Matrix([a_b_plus, a_e_plus, a_l_plus])
         self.a_minus = Matrix([a_b_minus, a_e_minus, a_l_minus])
 
-        self.b_plus = self.a_plus # Have to add propagation matrices
-        self.b_minus = self.a_minus
+        self.b_plus = self.propagation_matrix * self.a_plus
+        self.b_minus = self.inv_proagation_matrix * self.a_minus
 
     def get_parameters(self, id: int = None) -> list:
         # This function gives back the set of parameters to be used.

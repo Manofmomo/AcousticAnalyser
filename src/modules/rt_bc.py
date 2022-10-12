@@ -4,12 +4,12 @@ from src.modules.member import member as member_type
 
 c1, d1 = symbols("c_traveling, d_traveling")
 c2, d2 = symbols("c_evanescent, d_evanescent")
-rho1, Area1, E1, I1 = symbols("rho1, Area1, E1, I1")
+density1, Area1, E1, I1 = symbols("density1, Area1, E1, I1")
 
 
 def _subs(eqns: list, m1: member_type) -> list:
     subs_dict = {
-        rho1: m1.rho,
+        density1: m1.density,
         Area1: m1.cross_section_area,
         E1: m1.youngs_modulus,
         I1: m1.inertia,

@@ -1,21 +1,21 @@
 {
   "0": {
     "length": 1,
-    "rho": 1,
+    "density": 1,
     "cross_section_area": 1,
     "youngs_modulus": 1,
     "inertia": 1
   },
   "1": {
     "length": 1,
-    "rho": 1,
+    "density": 1,
     "cross_section_area": 1,
     "youngs_modulus": 1,
     "inertia": 1
   },
   "2": {
     "length": 1,
-    "rho": 1,
+    "density": 1,
     "cross_section_area": 1,
     "youngs_modulus": 1,
     "inertia": 1

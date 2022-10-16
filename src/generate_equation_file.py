@@ -176,16 +176,13 @@ if __name__ == "__main__":
     filehandler = open("equations/cross_section", "wb")
     pickle.dump(obj, filehandler)
     filehandler.close()
-    print("Cross Section equations saved")
 
     obj = get_equation_free_end()
     filehandler = open("equations/free_end", "wb")
     pickle.dump(obj, filehandler)
     filehandler.close()
-    print("Free end equations saved")
 
     obj = get_equation_fixed_end()
     filehandler = open("equations/fixed_end", "wb")
     pickle.dump(obj, filehandler)
     filehandler.close()
-    print("Fixed End equations saved")

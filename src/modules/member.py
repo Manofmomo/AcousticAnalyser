@@ -1,5 +1,6 @@
 from sympy import symbols, Matrix, I, E
 import logging
+from typing import List
 
 logging.basicConfig(
     level=logging.DEBUG, format="%(asctime)s %(name)s %(levelname)s:%(message)s"
@@ -83,12 +84,17 @@ class member:
                 i=self.id
             )
         )
+        self.params = [a_b_plus, a_e_plus, a_b_minus, a_e_minus, a_l_plus, a_l_minus]
+
         self.a_plus = Matrix([a_b_plus, a_e_plus, a_l_plus])
         self.a_minus = Matrix([a_b_minus, a_e_minus, a_l_minus])
 
         self.b_plus = self.propagation_matrix * self.a_plus
         self.b_minus = self.inv_proagation_matrix * self.a_minus
         logger.debug(f"Parameters set for member {self.id}")
+
+    def get_all_parameters(self) -> List[symbols]:
+        return self.params
 
     def get_parameters(self, id: int = None) -> list:
         # This function gives back the set of parameters to be used.

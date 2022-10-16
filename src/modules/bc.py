@@ -27,7 +27,7 @@ class free_end(bc):
     def __init__(self, member: member_type, id: int) -> None:
         super().__init__(member=member, id=id)
         self.reflection_matrix = get_r_of_free_end(m1=member)
-        print(self.reflection_matrix)
+
         logger.debug(f"Reflection Matrix for free_end {self.id} calculated")
 
     def get_equations(self) -> list:
@@ -44,7 +44,7 @@ class fixed_end(bc):
     def __init__(self, member: member_type, id: int) -> None:
         super().__init__(member=member, id=id)
         self.reflection_matrix = get_r_of_fixed_end(m1=member)
-        print(self.reflection_matrix)
+
         logger.debug(f"Reflection Matrix for free_end {self.id} calculated")
 
     def get_equations(self) -> list:

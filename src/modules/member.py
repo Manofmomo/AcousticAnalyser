@@ -9,7 +9,8 @@ logger = logging.getLogger(__name__)
 
 
 class member:
-    # This class emulates a member with all its physical properties
+    """This class emulates a member with all its physical properties"""
+
     def __init__(
         self,
         length: float,
@@ -47,7 +48,7 @@ class member:
         self.set_parameters()
 
     def check_constraint_count(self) -> bool:
-        # Each member can have only 2 constraints added to it at present
+        """Each member can have only 2 constraints added to it at present"""
         if self.constraint_count < 2:
             return True
         else:
@@ -97,9 +98,10 @@ class member:
         return self.params
 
     def get_parameters(self, id: int = None) -> list:
-        # This function gives back the set of parameters to be used.
-        # It corrects for the sign convention of the constraint when returning parameters
-        # Positive direction is from lower to higher constraint id
+        """This function gives back the set of parameters to be used.
+        It corrects for the sign convention of the constraint when returning parameters
+        Positive direction is from lower to higher constraint id
+        """
         if id == max(self.constraint_ids):
             return [self.b_minus, self.b_plus]
         else:

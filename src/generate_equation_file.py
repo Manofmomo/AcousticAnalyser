@@ -20,8 +20,8 @@ def get_equation_fixed_end() -> sympy.Matrix:
     return reflection
 
 
-# Assuming Wave equation to be A*e^(-I*k*x) + B*e^(-k*x) + C*e^(I*k*x) + D*e^(k*x)
 def get_equation_cross() -> Tuple[sympy.Matrix]:
+    """Gets the M0-M6 of a joint assuming Wave equation to be A*e^(-I*k*x) + B*e^(-k*x) + C*e^(I*k*x) + D*e^(k*x)"""
 
     w = sympy.symbols("w")
     density1, area1, E1, I1, L1 = sympy.symbols("density1, area1, E1, I1, L1")

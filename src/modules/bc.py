@@ -10,7 +10,8 @@ logger = logging.getLogger(__name__)
 
 
 class bc:
-    # This class emulates a boundary condition that can be added to members
+    """This class emulates a boundary condition that can be added to members"""
+
     def __init__(self, member: member_type, id: int) -> None:
         if type(member) != member_type:
             raise Exception("members must belong to class Member")
@@ -23,7 +24,8 @@ class bc:
 
 
 class free_end(bc):
-    # This is a free end boundary condition
+    """This is a free end boundary condition"""
+
     def __init__(self, member: member_type, id: int) -> None:
         super().__init__(member=member, id=id)
         self.reflection_matrix = get_r_of_free_end(m1=member)
@@ -48,7 +50,7 @@ class fixed_end(bc):
         logger.debug(f"Reflection Matrix for free_end {self.id} calculated")
 
     def get_equations(self) -> list:
-        # Gets the equations from the reflection and transmission matrices
+        """Gets the equations from the reflection and transmission matrices"""
         a_plus, a_minus = self.member.get_parameters(id=self.id)
 
         matrix_reflect = self.reflection_matrix * a_plus - a_minus

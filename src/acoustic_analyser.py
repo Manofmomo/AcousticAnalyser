@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 def get_coefficient_matrix(eqns: equation_type, params: list) -> Matrix:
-    # This is intended to extract the coefficients from eqns and build a matrix
+    """This is intended to extract the coefficients from eqns and build a matrix"""
     coeff_list = []
     for eqn in eqns:
         eqn = eqn.expand()
@@ -27,8 +27,10 @@ def get_coefficient_matrix(eqns: equation_type, params: list) -> Matrix:
 
 
 class frame:
-    # This class emulates a mechanical frame consisting of joints and members
-    # It is the class the user directly interacts with
+    """This class emulates a mechanical frame consisting of joints and members
+    It is the class the user directly interacts with
+    """
+
     def __init__(self) -> None:
         self.members: Dict[int, member_type] = {}
         self.constraints = []
@@ -70,7 +72,7 @@ class frame:
         inertia: float,
         id: int,
     ) -> member_type:
-        # This function allows the user to add a member to the structure
+        """This function allows the user to add a member to the structure"""
         member_obj = member_type(
             length=length,
             density=density,
@@ -85,8 +87,10 @@ class frame:
         return member_obj
 
     def _add_constraint(func):
-        # This is a decorator function defined to ease the process of development
-        # It handles the adding of a constraint object to the structure
+        """This is a decorator function defined to ease the process of development
+        It handles the adding of a constraint object to the structure
+        """
+
         def inner1(self, *args, **kwargs):
             constraint_obj = func(self, *args, **kwargs)
             self.constraints.append(constraint_obj)
@@ -99,7 +103,7 @@ class frame:
         return self.constraints
 
     def _get_constraint_id(self):
-        # Gets the constraint ID that would be used if the checks succeed
+        """Gets the constraint ID that would be used if the checks succeed"""
         return self.constraints_count + 1
 
     # Here the joints/BCs are defined
@@ -139,7 +143,7 @@ class frame:
             self.params.extend(member.get_all_parameters())
 
     def get_equation_matrix(self):
-        # This function is responsible for collecting the equations from the constraints and constructing the desired matrix from them
+        """This function is responsible for collecting the equations from the constraints and constructing the desired matrix from them"""
         self._set_params()
 
         eqns = []

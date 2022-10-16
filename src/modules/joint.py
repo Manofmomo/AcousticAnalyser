@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class joint:
-    # This class emulates a joint that can be added to members
+    """This class emulates a joint that can be added to members"""
 
     def __init__(self, members: List[member_type], id: int) -> None:
         for member in members:
@@ -30,7 +30,8 @@ class joint:
 
 
 class two_member(joint):
-    # This class emulates a two-member joint
+    """This class emulates a two-member joint"""
+
     def __init__(
         self, theta: float, member_1: member_type, member_2: member_type, id: int
     ) -> None:
@@ -43,7 +44,7 @@ class two_member(joint):
         )
 
     def get_equations(self) -> list:
-        # Gets the equations from the reflection and transmission matrices
+        """Gets the equations from the reflection and transmission matrices"""
         a_plus, a_minus = self.members[0].get_parameters(id=self.id)
         b_plus, b_minus = self.members[1].get_parameters(id=self.id)
 

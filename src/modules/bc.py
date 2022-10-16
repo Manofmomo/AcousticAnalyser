@@ -1,6 +1,12 @@
 from src.modules.member import member as member_type
 from src.modules.rt_bc import get_r_of_fixed_end, get_r_of_free_end
 from sympy import Matrix
+import logging
+
+logging.basicConfig(
+    level=logging.DEBUG, format="%(asctime)s %(name)s %(levelname)s:%(message)s"
+)
+logger = logging.getLogger(__name__)
 
 
 class bc:
@@ -21,14 +27,16 @@ class free_end(bc):
     def __init__(self, member: member_type, id: int) -> None:
         super().__init__(member=member, id=id)
         self.reflection_matrix = get_r_of_free_end(m1=member)
+        print(self.reflection_matrix)
+        logger.debug(f"Reflection Matrix for free_end {self.id} calculated")
 
     def get_equations(self) -> list:
-        a1, b1, c1, d1 = self.member.get_parameters(
-            id=self.id
-        )  # joint_id has to be used when accessing member parameters
+        a_plus, a_minus = self.member.get_parameters(id=self.id)
 
-        eqns = self.reflection_matrix * Matrix([c1, d1]) - Matrix([a1, b1])
+        matrix_reflect = self.reflection_matrix * a_plus - a_minus
 
+        eqns = matrix_reflect
+        logger.debug(f"Equations for free_end {self.id} calculated")
         return eqns
 
 
@@ -36,10 +44,15 @@ class fixed_end(bc):
     def __init__(self, member: member_type, id: int) -> None:
         super().__init__(member=member, id=id)
         self.reflection_matrix = get_r_of_fixed_end(m1=member)
+        print(self.reflection_matrix)
+        logger.debug(f"Reflection Matrix for free_end {self.id} calculated")
 
     def get_equations(self) -> list:
-        a1, b1, c1, d1 = self.member.get_parameters(id=self.id)
+        # Gets the equations from the reflection and transmission matrices
+        a_plus, a_minus = self.member.get_parameters(id=self.id)
 
-        eqns = self.reflection_matrix * Matrix([c1, d1]) - Matrix([a1, b1])
+        matrix_reflect = self.reflection_matrix * a_plus - a_minus
 
+        eqns = matrix_reflect
+        logger.debug(f"Equations for fixed_end {self.id} calculated")
         return eqns

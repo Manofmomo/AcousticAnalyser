@@ -3,84 +3,25 @@ from zipfile import ZIP_DEFLATED
 import sympy
 from sympy import I
 import pickle
+from typing import Tuple
 
 # This initial code is developed using Euler-Bernoulli beam mode
 
 
-def get_equation_free_end():
+def get_equation_free_end() -> sympy.Matrix:
+    reflection = sympy.Matrix([[-I, -1 + I, 0], [-1 + I, I, 0], [0, 0, -1]])
 
-    x = sympy.symbols("x")
-    w = sympy.symbols("w")
-    density1, area1, E1, I1 = sympy.symbols("density1, area1, E1, I1")
-
-    K1 = (density1 * area1 / (E1 * I1)) ** (0.25) * (w**0.5)
-
-    c1, d1 = sympy.symbols("c_traveling, d_traveling")
-    c2, d2 = sympy.symbols("c_evanescent, d_evanescent")
-    params = [(c1, d1), (c2, d2)]
-
-    travelling_wave = sympy.exp(-I * K1 * x)
-    evanescent_wave = sympy.exp(-1 * K1 * x)
-    waves = [travelling_wave, evanescent_wave]
-
-    final_equations = []
-
-    for i in range(2):
-        incoming_wave = waves[i]
-        c, d = params[i]
-
-        v = incoming_wave + c * sympy.exp(I * K1 * x) + d * sympy.exp(K1 * x)
-        vdiffs = [None] * 4
-        vdiffs[0] = v
-        for i in range(3):
-            vdiffs[i + 1] = sympy.diff(vdiffs[i], x)
-
-        eq1 = vdiffs[2].subs(x, 0)
-        eq2 = vdiffs[3].subs(x, 0)
-
-        final_equations.append([eq1, eq2])
-
-    return final_equations
+    return reflection
 
 
-def get_equation_fixed_end():
+def get_equation_fixed_end() -> sympy.Matrix:
+    reflection = sympy.Matrix([[-I, -1 + I, 0], [1 - I, I, 0], [0, 0, 1]])
 
-    x = sympy.symbols("x")
-    w = sympy.symbols("w")
-    density1, area1, E1, I1 = sympy.symbols("density1, area1, E1, I1")
-
-    K1 = (density1 * area1 / (E1 * I1)) ** (0.25) * (w**0.5)
-
-    c1, d1 = sympy.symbols("c_traveling, d_traveling")
-    c2, d2 = sympy.symbols("c_evanescent, d_evanescent")
-    params = [(c1, d1), (c2, d2)]
-
-    travelling_wave = sympy.exp(-I * K1 * x)
-    evanescent_wave = sympy.exp(-1 * K1 * x)
-    waves = [travelling_wave, evanescent_wave]
-
-    final_equations = []
-
-    for i in range(2):
-        incoming_wave = waves[i]
-        c, d = params[i]
-
-        v = incoming_wave + c * sympy.exp(I * K1 * x) + d * sympy.exp(K1 * x)
-        vdiffs = [None] * 4
-        vdiffs[0] = v
-        for i in range(3):
-            vdiffs[i + 1] = sympy.diff(vdiffs[i], x)
-
-        eq1 = vdiffs[0].subs(x, 0)
-        eq2 = vdiffs[1].subs(x, 0)
-
-        final_equations.append([eq1, eq2])
-
-    return final_equations
+    return reflection
 
 
 # Assuming Wave equation to be A*e^(-I*k*x) + B*e^(-k*x) + C*e^(I*k*x) + D*e^(k*x)
-def get_equation_cross():
+def get_equation_cross() -> Tuple[sympy.Matrix]:
 
     w = sympy.symbols("w")
     density1, area1, E1, I1, L1 = sympy.symbols("density1, area1, E1, I1, L1")

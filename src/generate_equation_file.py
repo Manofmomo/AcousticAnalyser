@@ -4,7 +4,12 @@ import sympy
 from sympy import I
 import pickle
 from typing import Tuple
+import logging
 
+logging.basicConfig(
+    level=logging.DEBUG, format="%(asctime)s %(name)s %(levelname)s:%(message)s"
+)
+logger = logging.getLogger(__name__)
 # This initial code is developed using Euler-Bernoulli beam mode
 
 
@@ -39,8 +44,8 @@ def get_equation_cross() -> Tuple[sympy.Matrix]:
             [0, 0, zeta * omega - I / omega],
             [zeta * omega - I, zeta * omega + 1, 0],
             [
-                1 + 0.5 * I * zeta * sympy.tan(theta / 2),
-                -1 - 0.5 * I * zeta * sympy.tan(theta / 2),
+                1 + 0.5 * I * zeta * omega * sympy.tan(theta / 2),
+                -1 - 0.5 * I * zeta * omega * sympy.tan(theta / 2),
                 0,
             ],
         ]
@@ -80,7 +85,7 @@ def get_equation_cross() -> Tuple[sympy.Matrix]:
 
     M3 = sympy.Matrix(
         [
-            [I * sympy.sin(theta), -sympy.sin(theta), I * sympy.cos(theta) / omega],
+            [I * sympy.sin(theta), -sympy.sin(theta), -I * sympy.cos(theta) / omega],
             [
                 -0.5
                 * I
@@ -137,8 +142,8 @@ def get_equation_cross() -> Tuple[sympy.Matrix]:
                 -1,
             ],
             [
-                -1 - 0.5 * I * zeta * theta * sympy.sin(theta),
-                -1 - 0.5 * zeta * theta * sympy.sin(theta),
+                -1 - 0.5 * I * zeta * omega * sympy.sin(theta),
+                -1 - 0.5 * zeta * omega * sympy.sin(theta),
                 0,
             ],
             [
@@ -156,8 +161,8 @@ def get_equation_cross() -> Tuple[sympy.Matrix]:
                 -1,
             ],
             [
-                -1 + 0.5 * I * zeta * theta * sympy.sin(theta),
-                -1 + 0.5 * zeta * theta * sympy.sin(theta),
+                -1 + 0.5 * I * zeta * omega * sympy.sin(theta),
+                -1 + 0.5 * zeta * omega * sympy.sin(theta),
                 0,
             ],
             [
@@ -176,13 +181,16 @@ if __name__ == "__main__":
     filehandler = open("equations/cross_section", "wb")
     pickle.dump(obj, filehandler)
     filehandler.close()
+    logger.debug("cross_section generated")
 
     obj = get_equation_free_end()
     filehandler = open("equations/free_end", "wb")
     pickle.dump(obj, filehandler)
     filehandler.close()
+    logger.debug("free_end generated")
 
     obj = get_equation_fixed_end()
     filehandler = open("equations/fixed_end", "wb")
     pickle.dump(obj, filehandler)
     filehandler.close()
+    logger.debug("fixed_end generated")

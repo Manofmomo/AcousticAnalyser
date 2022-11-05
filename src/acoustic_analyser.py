@@ -70,6 +70,7 @@ class frame:
         cross_section_area: float,
         youngs_modulus: float,
         inertia: float,
+        height: float,
         id: int,
     ) -> member_type:
         """This function allows the user to add a member to the structure"""
@@ -79,6 +80,7 @@ class frame:
             cross_section_area=cross_section_area,
             youngs_modulus=youngs_modulus,
             inertia=inertia,
+            height=height,
             omega=self.omega,
             id=id,
         )

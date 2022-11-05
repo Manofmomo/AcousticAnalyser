@@ -12,8 +12,8 @@ logger = logging.getLogger(__name__)
 
 a1, b1, c1, d1 = symbols("a_traveling,  b_traveling, c_traveling, d_traveling")
 a2, b2, c2, d2 = symbols("a_evanescent, b_evanescent, c_evanescent, d_evanescent")
-density1, area1, E1, I1, L1 = symbols("density1, area1, E1, I1, L1")
-density2, area2, E2, I2, L2 = symbols("density2, area2, E2, I2, L2")
+density1, area1, E1, I1, L1, H1 = symbols("density1, area1, E1, I1, L1, H1")
+density2, area2, E2, I2, L2, H2 = symbols("density2, area2, E2, I2, L2, H2")
 theta_sym = symbols("theta")
 
 
@@ -24,11 +24,13 @@ def _subs(eqns: List[Matrix], m1: member_type, m2: member_type, theta: float) ->
         E1: m1.youngs_modulus,
         I1: m1.inertia,
         L1: m1.length,
+        H1: m1.height,
         density2: m2.density,
         area2: m2.cross_section_area,
         E2: m2.youngs_modulus,
         I2: m2.inertia,
         L2: m2.length,
+        H2: m2.height,
         theta_sym: theta,
     }
     for i in range(len(eqns)):
@@ -37,16 +39,27 @@ def _subs(eqns: List[Matrix], m1: member_type, m2: member_type, theta: float) ->
 
 
 def _get_soln(eqns: List[Matrix]) -> Tuple[Matrix]:
-    M1, M2, M3, M4, M5, M6 = eqns
+    M1, M2, M3, M4, M5, M6, N1, N2, N3, N4, N5, N6 = eqns
     logger.debug(M1)
-    transmission_matrix = (M5.inv() * M4 - M2.inv() * M1).inv() * (
+    transmission_matrix_12 = (N5.inv() * N4 - N2.inv() * N1).inv() * (
+        N5.inv() * N6 - N2.inv() * N3
+    )
+    reflection_matrix_11 = (N1.inv() * N2 - N4.inv() * N5).inv() * (
+        N4.inv() * N6 - N1.inv() * N3
+    )
+    transmission_matrix_21 = (M5.inv() * M4 - M2.inv() * M1).inv() * (
         M5.inv() * M6 - M2.inv() * M3
     )
-    reflection_matrix = (M1.inv() * M2 - M4.inv() * M5).inv() * (
+    reflection_matrix_22 = (M1.inv() * M2 - M4.inv() * M5).inv() * (
         M4.inv() * M6 - M1.inv() * M3
     )
 
-    return (reflection_matrix, transmission_matrix)
+    return (
+        reflection_matrix_11,
+        reflection_matrix_22,
+        transmission_matrix_12,
+        transmission_matrix_21,
+    )
 
 
 def get_rt_of_cross_section(m1: member_type, m2: member_type, theta: float) -> tuple:

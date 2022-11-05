@@ -53,6 +53,7 @@ class two_member(joint):
             + self.transmission_matrix * b_minus
             - a_minus
         )
+        # DIFFERENT REFLECTION TRANSMISSION
         matrix_transmit = (
             self.transmission_matrix * a_plus
             + self.reflection_matrix * b_minus

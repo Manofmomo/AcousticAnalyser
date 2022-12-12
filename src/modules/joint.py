@@ -39,7 +39,7 @@ class two_member(joint):
         self.member_joint_type = []
         members = [member_1, member_2]
         super().__init__(members=members, id=id)
-        self.reflection_matrix, self.transmission_matrix = get_rt_of_cross_section(
+        self.reflection_matrix_11, self.reflection_matrix_22, self.transmission_matrix_12, self.transmission_matrix_21= get_rt_of_cross_section(
             m1=member_1, m2=member_2, theta=theta
         )
 
@@ -49,14 +49,14 @@ class two_member(joint):
         b_plus, b_minus = self.members[1].get_parameters(id=self.id)
 
         matrix_reflect = (
-            self.reflection_matrix * a_plus
-            + self.transmission_matrix * b_minus
+            self.reflection_matrix_11 * a_plus
+            + self.transmission_matrix_21 * b_minus
             - a_minus
         )
         # DIFFERENT REFLECTION TRANSMISSION
         matrix_transmit = (
-            self.transmission_matrix * a_plus
-            + self.reflection_matrix * b_minus
+            self.transmission_matrix_12 * a_plus
+            + self.reflection_matrix_22 * b_minus
             - b_plus
         )
         eqns = matrix_reflect.col_join(matrix_transmit)

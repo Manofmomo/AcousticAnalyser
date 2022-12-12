@@ -67,7 +67,7 @@ def get_rt_of_cross_section(m1: member_type, m2: member_type, theta: float) -> t
     eqns = pickle_load(file)
     logger.debug("Equation File Loaded")
     eqns = _subs(eqns, m1, m2, theta)
-    logger.debug("M0-M6 Substituted")
+    logger.debug("M0-M6 N0-N6 Substituted")
     reflection_transmission = _get_soln(eqns)
     logger.debug("Reflection Transmission Calculated")
     return reflection_transmission

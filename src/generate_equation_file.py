@@ -1,9 +1,11 @@
+#%%
 import sympy
-from sympy import I
+from sympy.parsing.mathematica import parse_mathematica as parse
+from sympy import I, sin, cos, tan
 import pickle
 from typing import Tuple
 import logging
-
+#%%
 logging.basicConfig(
     level=logging.DEBUG, format="%(asctime)s %(name)s %(levelname)s:%(message)s"
 )
@@ -24,266 +26,44 @@ def get_equation_fixed_end() -> sympy.Matrix:
 
 
 def get_equation_cross() -> Tuple[sympy.Matrix]:
-    """Gets the M0-M6 of a joint assuming Wave equation to be A*e^(-I*k*x) + B*e^(-k*x) + C*e^(I*k*x) + D*e^(k*x)"""
-
+    """Gets the M0-M6 of a joint assuming Wave equation to be A*e^(-I*k*Zeta) + B*e^(-k*Zeta) + C*e^(I*k*Zeta) + D*e^(k*Zeta)"""
+    #%%
     w = sympy.symbols("w")
     density1, area1, E1, I1, H1 = sympy.symbols("density1, area1, E1, I1, H1")
+    theta = sympy.symbols("theta")
+
+    # tO REMOVE
+    pi=3.1416
+    theta=90*pi/180
+    E1=206e9
+    density1=7800
+    H1=1.27e-2        
+    I1=(H1**4)/12
+    area1=H1*H1
+    w=2*pi*20
+    # Till here
 
     C = (E1 / density1) ** 0.5
     K1 = (I1 / area1) ** 0.5
 
-    zeta = H1 / K1
+    Zeta = H1 / K1
     omega = (w * K1 / C) ** 0.5
-    theta = sympy.symbols("theta")
+    
+    #%%
+    M1 = sympy.Matrix(parse("{{I*Sin[theta], -Sin[theta], ((-I)*Cos[theta])/omega}, {(-I)*Cos[theta], Cos[theta], ((-I)*Sin[theta])/omega}, {(-omega^2 - (I/2)*Zeta*omega^3*Tan[theta/2])/omega^2, (omega^2 + (Zeta*omega^3*Tan[theta/2])/2)/omega^2, 0}}"))
+    M2 = sympy.Matrix(parse("{{0, 0, -(((-I)*omega^2 + Zeta*omega^4)/omega^3)}, {-(((-I)*omega^3 + Zeta*omega^4 + (I/2)*Zeta^2*omega^5*Tan[theta/2])/omega^3), -((omega^3 + Zeta*omega^4 + (Zeta^2*omega^5*Tan[theta/2])/2)/omega^3), 0}, {-((omega^2 + (I/6)*Zeta^3*omega^5 + (I/2)*Zeta*omega^3*Tan[theta/2])/omega^2), -((-omega^2 + (Zeta^3*omega^5)/6 - (Zeta*omega^3*Tan[theta/2])/2)/omega^2), 0}}"))
+    M3 = sympy.Matrix(parse("{{0, 0, -((I*omega^2 + Zeta*omega^4)/omega^3)}, {-((I*omega^3 + Zeta*omega^4 - (I/2)*Zeta^2*omega^5*Tan[theta/2])/omega^3), -((-omega^3 + Zeta*omega^4 - (Zeta^2*omega^5*Tan[theta/2])/2)/omega^3), 0}, {-((omega^2 - (I/6)*Zeta^3*omega^5 - (I/2)*Zeta*omega^3*Tan[theta/2])/omega^2), -((-omega^2 - (Zeta^3*omega^5)/6 + (Zeta*omega^3*Tan[theta/2])/2)/omega^2), 0}}"))
+    M4 = sympy.Matrix(parse("{{0, 0, 1}, {1, 1, 0}, {-I, -1, 0}}"))
+    M5 = sympy.Matrix(parse("{{Sin[theta] + (I/2)*Zeta*omega*Sin[theta]*Tan[theta/2], Sin[theta] + (Zeta*omega*Sin[theta]*Tan[theta/2])/2, Cos[theta]}, {Cos[theta] + (I/2)*Zeta*omega*Tan[theta/2] + (I/2)*Zeta*omega*Cos[theta]*Tan[theta/2], Cos[theta] + (Zeta*omega*Tan[theta/2])/2 + (Zeta*omega*Cos[theta]*Tan[theta/2])/2, -Sin[theta]}, {I, 1, 0}}"))
+    M6 = sympy.Matrix(parse("{{Sin[theta] - (I/2)*Zeta*omega*Sin[theta]*Tan[theta/2], Sin[theta] - (Zeta*omega*Sin[theta]*Tan[theta/2])/2, Cos[theta]}, {Cos[theta] - (I/2)*Zeta*omega*Tan[theta/2] - (I/2)*Zeta*omega*Cos[theta]*Tan[theta/2], Cos[theta] - (Zeta*omega*Tan[theta/2])/2 - (Zeta*omega*Cos[theta]*Tan[theta/2])/2, -Sin[theta]}, {-I, -1, 0}}"))
 
-    M1 = sympy.Matrix(
-        [
-            [0, 0, zeta * omega - I / omega],
-            [zeta * omega - I, zeta * omega + 1, 0],
-            [
-                1 + 0.5 * I * zeta * omega * sympy.tan(theta / 2),
-                -1 - 0.5 * I * zeta * omega * sympy.tan(theta / 2),
-                0,
-            ],
-        ]
-    )
-
-    M2 = sympy.Matrix(
-        [
-            [-I * sympy.sin(theta), sympy.sin(theta), I * sympy.cos(theta) / omega],
-            [
-                0.5
-                * I
-                * (
-                    (zeta**2) * (omega**2) * sympy.tan(theta / 2)
-                    + 2 * sympy.cos(theta)
-                ),
-                0.5 * (zeta**2) * (omega**2) * sympy.tan(theta / 2)
-                - sympy.cos(theta),
-                I * sympy.sin(theta) / omega,
-            ],
-            [
-                (1 / 6)
-                * (
-                    I * (zeta**3) * (omega**3)
-                    + 3 * I * zeta * omega * sympy.tan(theta / 2)
-                    + 6
-                ),
-                (1 / 6)
-                * (
-                    (zeta**3) * (omega**3)
-                    - 3 * zeta * omega * sympy.tan(theta / 2)
-                    - 6
-                ),
-                0,
-            ],
-        ]
-    )
-
-    M3 = sympy.Matrix(
-        [
-            [I * sympy.sin(theta), -sympy.sin(theta), -I * sympy.cos(theta) / omega],
-            [
-                -0.5
-                * I
-                * (
-                    (zeta**2) * (omega**2) * sympy.tan(theta / 2)
-                    + 2 * sympy.cos(theta)
-                ),
-                -0.5 * (zeta**2) * (omega**2) * sympy.tan(theta / 2)
-                + sympy.cos(theta),
-                -I * sympy.sin(theta) / omega,
-            ],
-            [
-                -(1 / 6)
-                * I
-                * (
-                    (zeta**3) * (omega**3)
-                    + 3 * zeta * omega * sympy.tan(theta / 2)
-                    + 6 * I
-                ),
-                (1 / 6)
-                * (
-                    -(zeta**3) * (omega**3)
-                    + 3 * zeta * omega * sympy.tan(theta / 2)
-                    - 6
-                ),
-                0,
-            ],
-        ]
-    )
-    M4 = sympy.Matrix(
-        [
-            [
-                -sympy.sin(theta),
-                -sympy.sin(theta),
-                -sympy.cos(theta),
-            ],
-            [
-                -sympy.cos(theta),
-                -sympy.cos(theta),
-                sympy.sin(theta),
-            ],
-            [
-                I,
-                1,
-                0,
-            ],
-        ]
-    )
-    M5 = sympy.Matrix(
-        [
-            [
-                -I * zeta * omega * (sympy.sin(theta / 2) ** 2),
-                -zeta * omega * (sympy.sin(theta / 2) ** 2),
-                -1,
-            ],
-            [
-                -1 - 0.5 * I * zeta * omega * sympy.sin(theta),
-                -1 - 0.5 * zeta * omega * sympy.sin(theta),
-                0,
-            ],
-            [
-                -I,
-                -1,
-                0,
-            ],
-        ]
-    )
-    M6 = sympy.Matrix(
-        [
-            [
-                I * zeta * omega * (sympy.sin(theta / 2) ** 2),
-                zeta * omega * (sympy.sin(theta / 2) ** 2),
-                -1,
-            ],
-            [
-                -1 + 0.5 * I * zeta * omega * sympy.sin(theta),
-                -1 + 0.5 * zeta * omega * sympy.sin(theta),
-                0,
-            ],
-            [
-                I,
-                1,
-                0,
-            ],
-        ]
-    )
-
-    N1 = sympy.Matrix(
-        [
-            [I * sympy.sin(theta), -sympy.sin(theta), -I * sympy.cos(theta) / omega],
-            [-I * sympy.cos(theta), sympy.cos(theta), -I * sympy.sin(theta) / omega],
-            [
-                1 - 0.5 * I * zeta * omega * sympy.tan(theta / 2),
-                1 + 0.5 * 1 * zeta * omega * sympy.tan(theta / 2),
-                0,
-            ],
-        ]
-    )
-
-    N2 = sympy.Matrix(
-        [
-            [0, 0, -zeta * omega + I / omega],
-            [
-                -0.5 * I * (zeta**2) * (omega**2) * sympy.tan(theta / 2)
-                - zeta * omega
-                + I,
-                -0.5 * 1 * (zeta**2) * (omega**2) * sympy.tan(theta / 2)
-                - zeta * omega
-                - 1,
-                0,
-            ],
-            [
-                -(1 / 6)
-                * I
-                * (
-                    (zeta * omega) ** 3
-                    + 3 * zeta * omega * sympy.tan(theta / 2)
-                    - 6 * I
-                ),
-                (1 / 6)
-                * 1
-                * (
-                    -((zeta * omega) ** 3) + 3 * zeta * omega * sympy.tan(theta / 2) + 6
-                ),
-                0,
-            ],
-        ]
-    )
-
-    N3 = sympy.Matrix(
-        [
-            [0, 0, -zeta * omega - I / omega],
-            [
-                0.5
-                * I
-                * (
-                    (zeta**2) * (omega**2) * sympy.tan(theta / 2)
-                    + 2 * I * zeta * omega
-                    - 2
-                ),
-                0.5 * 1 * (zeta**2) * (omega**2) * sympy.tan(theta / 2)
-                - zeta * omega
-                + 1,
-                0,
-            ],
-            [
-                (1 / 6)
-                * I
-                * (
-                    (zeta * omega) ** 3
-                    + 3 * zeta * omega * sympy.tan(theta / 2)
-                    + 6 * I
-                ),
-                (1 / 6)
-                * 1
-                * ((zeta * omega) ** 3 - 3 * zeta * omega * sympy.tan(theta / 2) + 6),
-                0,
-            ],
-        ]
-    )
-
-    N4 = sympy.Matrix(
-        [
-            [0, 0, 1],
-            [1, 1, 0],
-            [-I, -1, 0],
-        ]
-    )
-
-    N5 = sympy.Matrix(
-        [
-            [
-                sympy.sin(theta) + I * zeta * omega * (sympy.sin(theta / 2)) ** 2,
-                0.5 * sympy.sin(theta) * (zeta * omega * sympy.tan(theta / 2) + 2),
-                sympy.cos(theta),
-            ],
-            [
-                sympy.cos(theta) + 0.5 * I * zeta * omega * sympy.sin(theta),
-                0.5 * zeta * omega * sympy.sin(theta) + sympy.cos(theta),
-                -sympy.sin(theta),
-            ],
-            [I, 1, 0],
-        ]
-    )
-
-    N6 = sympy.Matrix(
-        [
-            [
-                sympy.sin(theta) - I * zeta * omega * (sympy.sin(theta / 2)) ** 2,
-                sympy.sin(theta) - zeta * omega * (sympy.sin(theta / 2)) ** 2,
-                sympy.cos(theta),
-            ],
-            [
-                sympy.cos(theta) - 0.5 * I * zeta * omega * sympy.sin(theta),
-                sympy.cos(theta) - 0.5 * 1 * zeta * omega * sympy.sin(theta),
-                -sympy.sin(theta),
-            ],
-            [-I, -1, 0],
-        ]
-    )
-
+    N1 = sympy.Matrix(parse("{{I*Sin[theta], -Sin[theta], ((-I)*Cos[theta])/omega}, {(-I)*Cos[theta], Cos[theta], ((-I)*Sin[theta])/omega}, {(-omega^2 - (I/2)*Zeta*omega^3*Tan[theta/2])/omega^2, (omega^2 + (Zeta*omega^3*Tan[theta/2])/2)/omega^2, 0}}"))
+    N2 = sympy.Matrix(parse("{{0, 0, -(((-I)*omega^2 + Zeta*omega^4)/omega^3)}, {-(((-I)*omega^3 + Zeta*omega^4 + (I/2)*Zeta^2*omega^5*Tan[theta/2])/omega^3), -((omega^3 + Zeta*omega^4 + (Zeta^2*omega^5*Tan[theta/2])/2)/omega^3), 0}, {-((omega^2 + (I/6)*Zeta^3*omega^5 + (I/2)*Zeta*omega^3*Tan[theta/2])/omega^2), -((-omega^2 + (Zeta^3*omega^5)/6 - (Zeta*omega^3*Tan[theta/2])/2)/omega^2), 0}}"))
+    N3 = sympy.Matrix(parse("{{0, 0, -((I*omega^2 + Zeta*omega^4)/omega^3)}, {-((I*omega^3 + Zeta*omega^4 - (I/2)*Zeta^2*omega^5*Tan[theta/2])/omega^3), -((-omega^3 + Zeta*omega^4 - (Zeta^2*omega^5*Tan[theta/2])/2)/omega^3), 0}, {-((omega^2 - (I/6)*Zeta^3*omega^5 - (I/2)*Zeta*omega^3*Tan[theta/2])/omega^2), -((-omega^2 - (Zeta^3*omega^5)/6 + (Zeta*omega^3*Tan[theta/2])/2)/omega^2), 0}}"))
+    N4 = sympy.Matrix(parse("{{0, 0, 1}, {1, 1, 0}, {-I, -1, 0}}"))
+    N5 = sympy.Matrix(parse("{{Sin[theta] + (I/2)*Zeta*omega*Sin[theta]*Tan[theta/2], Sin[theta] + (Zeta*omega*Sin[theta]*Tan[theta/2])/2, Cos[theta]}, {Cos[theta] + (I/2)*Zeta*omega*Tan[theta/2] + (I/2)*Zeta*omega*Cos[theta]*Tan[theta/2], Cos[theta] + (Zeta*omega*Tan[theta/2])/2 + (Zeta*omega*Cos[theta]*Tan[theta/2])/2, -Sin[theta]}, {I, 1, 0}}"))
+    N6 = sympy.Matrix(parse("{{Sin[theta] - (I/2)*Zeta*omega*Sin[theta]*Tan[theta/2], Sin[theta] - (Zeta*omega*Sin[theta]*Tan[theta/2])/2, Cos[theta]}, {Cos[theta] - (I/2)*Zeta*omega*Tan[theta/2] - (I/2)*Zeta*omega*Cos[theta]*Tan[theta/2], Cos[theta] - (Zeta*omega*Tan[theta/2])/2 - (Zeta*omega*Cos[theta]*Tan[theta/2])/2, -Sin[theta]}, {-I, -1, 0}}"))
+    #%%
     return [M1, M2, M3, M4, M5, M6, N1, N2, N3, N4, N5, N6]
 
 
@@ -305,3 +85,5 @@ if __name__ == "__main__":
     pickle.dump(obj, filehandler)
     filehandler.close()
     logger.debug("fixed_end generated")
+
+# %%

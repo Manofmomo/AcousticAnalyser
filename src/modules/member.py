@@ -15,9 +15,7 @@ class member:
         self,
         length: float,
         density: float,
-        cross_section_area: float,
         youngs_modulus: float,
-        inertia: float,
         height: float,
         omega: symbols,
         id: int,
@@ -26,24 +24,20 @@ class member:
             raise ValueError("length must be greater than 0")
         if density <= 0:
             raise ValueError("density must be greater than 0")
-        if cross_section_area <= 0:
-            raise ValueError("cross_section_area must be greater than 0")
         if youngs_modulus <= 0:
             raise ValueError("youngs_modulus must be greater than 0")
-        if inertia <= 0:
-            raise ValueError("inertia must be greater than 0")
         if height <= 0:
             raise ValueError("height must be greater than 0")
 
         self.length = length
         self.density = density
-        self.cross_section_area = cross_section_area
         self.youngs_modulus = youngs_modulus
-        self.inertia = inertia
         self.height = height
-
         self.id = id
         self.omega = omega
+
+        self.cross_section_area = height * height
+        self.inertia = (height**4) / 12
 
         self.constraint_count = 0
         self.constraint_ids = []

@@ -1,18 +1,14 @@
 {
   "0": {
-    "length": 1,
+    "youngs_modulus": 206e9,
     "density": 7800,
-    "cross_section_area": 0.0001612900,
-    "youngs_modulus": 206000000000,
-    "inertia": 0.000000002168,
-    "height": 0.0127
+    "height": 1.27e-2,
+    "length": 0.5
   },
   "1": {
-    "length": 1,
+    "youngs_modulus": 206e9,
     "density": 7800,
-    "cross_section_area": 0.0001612900,
-    "youngs_modulus": 206000000000,
-    "inertia": 0.000000002168,
-    "height": 0.0127
+    "height": 1.27e-2,
+    "length": 0.5
   }
 }

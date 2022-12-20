@@ -39,9 +39,12 @@ class two_member(joint):
         self.member_joint_type = []
         members = [member_1, member_2]
         super().__init__(members=members, id=id)
-        self.reflection_matrix_11, self.reflection_matrix_22, self.transmission_matrix_12, self.transmission_matrix_21= get_rt_of_cross_section(
-            m1=member_1, m2=member_2, theta=theta
-        )
+        (
+            self.reflection_matrix_11,
+            self.reflection_matrix_22,
+            self.transmission_matrix_12,
+            self.transmission_matrix_21,
+        ) = get_rt_of_cross_section(m1=member_1, m2=member_2, theta=theta)
 
     def get_equations(self) -> list:
         """Gets the equations from the reflection and transmission matrices"""

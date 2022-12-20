@@ -35,24 +35,30 @@ def _subs(eqns: List[Matrix], m1: member_type, m2: member_type, theta: float) ->
     }
     for i in range(len(eqns)):
         eqns[i] = eqns[i].subs(subs_dict)
+        eqns[i].simplify()
     return eqns
 
 
 def _get_soln(eqns: List[Matrix]) -> Tuple[Matrix]:
     M1, M2, M3, M4, M5, M6, N1, N2, N3, N4, N5, N6 = eqns
+    logger.debug("M1 :")
     logger.debug(M1)
     transmission_matrix_12 = (N5.inv() * N4 - N2.inv() * N1).inv() * (
         N5.inv() * N6 - N2.inv() * N3
     )
+    logger.debug("transmission_matrix_12 Calculated")
     reflection_matrix_11 = (N1.inv() * N2 - N4.inv() * N5).inv() * (
         N4.inv() * N6 - N1.inv() * N3
     )
+    logger.debug("reflection_matrix_11 Calculated")
     transmission_matrix_21 = (M5.inv() * M4 - M2.inv() * M1).inv() * (
         M5.inv() * M6 - M2.inv() * M3
     )
+    logger.debug("transmission_matrix_21 Calculated")
     reflection_matrix_22 = (M1.inv() * M2 - M4.inv() * M5).inv() * (
         M4.inv() * M6 - M1.inv() * M3
     )
+    logger.debug("reflection_matrix_22 Calculated")
 
     return (
         reflection_matrix_11,

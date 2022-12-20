@@ -67,9 +67,7 @@ class frame:
         self,
         length: float,
         density: float,
-        cross_section_area: float,
         youngs_modulus: float,
-        inertia: float,
         height: float,
         id: int,
     ) -> member_type:
@@ -77,9 +75,7 @@ class frame:
         member_obj = member_type(
             length=length,
             density=density,
-            cross_section_area=cross_section_area,
             youngs_modulus=youngs_modulus,
-            inertia=inertia,
             height=height,
             omega=self.omega,
             id=id,

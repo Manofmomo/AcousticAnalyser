@@ -4,7 +4,7 @@ from sympy import Matrix
 import logging
 
 logging.basicConfig(
-    level=logging.DEBUG, format="%(asctime)s %(name)s %(levelname)s:%(message)s"
+    level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s:%(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -32,8 +32,8 @@ class free_end(bc):
 
         logger.debug(f"Reflection Matrix for free_end {self.id} calculated")
 
-    def get_equations(self) -> list:
-        a_plus, a_minus = self.member.get_parameters(id=self.id)
+    def get_equations(self, w: float) -> list:
+        a_plus, a_minus = self.member.get_parameters(id=self.id, w=w)
 
         matrix_reflect = self.reflection_matrix * a_plus - a_minus
 
@@ -49,9 +49,9 @@ class fixed_end(bc):
 
         logger.debug(f"Reflection Matrix for free_end {self.id} calculated")
 
-    def get_equations(self) -> list:
+    def get_equations(self, w: float) -> list:
         """Gets the equations from the reflection and transmission matrices"""
-        a_plus, a_minus = self.member.get_parameters(id=self.id)
+        a_plus, a_minus = self.member.get_parameters(id=self.id, w=w)
 
         matrix_reflect = self.reflection_matrix * a_plus - a_minus
 

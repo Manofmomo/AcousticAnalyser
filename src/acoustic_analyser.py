@@ -7,9 +7,10 @@ from json import load as json_load
 from csv import reader as csv_load
 import logging
 from typing import Dict
+import numpy as np
 
 logging.basicConfig(
-    level=logging.DEBUG, format="%(asctime)s %(name)s %(levelname)s:%(message)s"
+    level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s:%(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -21,9 +22,9 @@ def get_coefficient_matrix(eqns: equation_type, params: list) -> Matrix:
         eqn = eqn.expand()
         coeffs = []
         for param in params:
-            coeffs.append(eqn.coeff(param))
+            coeffs.append(complex(eqn.coeff(param)))
         coeff_list.append(coeffs)
-    return Matrix(coeff_list)
+    return np.array(coeff_list)
 
 
 class frame:
@@ -140,13 +141,13 @@ class frame:
         for member in self.members.values():
             self.params.extend(member.get_all_parameters())
 
-    def get_equation_matrix(self):
+    def get_equation_matrix(self, w: float):
         """This function is responsible for collecting the equations from the constraints and constructing the desired matrix from them"""
         self._set_params()
 
         eqns = []
         for constraint in self.constraints:
-            eqns.extend(list(constraint.get_equations()))
+            eqns.extend(list(constraint.get_equations(w=w)))
         logger.debug("All Equations Fetched")
 
         coeff_matrix = get_coefficient_matrix(eqns=eqns, params=self.params)

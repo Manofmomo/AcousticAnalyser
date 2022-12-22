@@ -7,7 +7,7 @@ from math import pi
 import logging
 
 logging.basicConfig(
-    level=logging.DEBUG, format="%(asctime)s %(name)s %(levelname)s:%(message)s"
+    level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s:%(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -39,17 +39,23 @@ class two_member(joint):
         self.member_joint_type = []
         members = [member_1, member_2]
         super().__init__(members=members, id=id)
+
+    def set_rt_matrices(self, w: float):
         (
             self.reflection_matrix_11,
             self.reflection_matrix_22,
             self.transmission_matrix_12,
             self.transmission_matrix_21,
-        ) = get_rt_of_cross_section(m1=member_1, m2=member_2, theta=theta)
+        ) = get_rt_of_cross_section(
+            m1=self.members[0], m2=self.members[1], theta=self.theta, w=w
+        )
 
-    def get_equations(self) -> list:
+    def get_equations(self, w: float) -> list:
         """Gets the equations from the reflection and transmission matrices"""
-        a_plus, a_minus = self.members[0].get_parameters(id=self.id)
-        b_plus, b_minus = self.members[1].get_parameters(id=self.id)
+        a_plus, a_minus = self.members[0].get_parameters(id=self.id, w=w)
+        b_plus, b_minus = self.members[1].get_parameters(id=self.id, w=w)
+
+        self.set_rt_matrices(w=w)
 
         matrix_reflect = (
             self.reflection_matrix_11 * a_plus

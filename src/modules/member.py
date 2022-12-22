@@ -3,7 +3,7 @@ import logging
 from typing import List
 
 logging.basicConfig(
-    level=logging.DEBUG, format="%(asctime)s %(name)s %(levelname)s:%(message)s"
+    level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s:%(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -59,7 +59,7 @@ class member:
         self.constraint_ids.append(id)
 
     def set_propagation_matrice(self):
-        w = symbols("w")
+        w = self.omega
         C = (self.youngs_modulus / self.density) ** 0.5
         K = (self.length / self.cross_section_area) ** 0.5
 
@@ -88,19 +88,24 @@ class member:
         self.a_plus = Matrix([a_b_plus, a_e_plus, a_l_plus])
         self.a_minus = Matrix([a_b_minus, a_e_minus, a_l_minus])
 
-        self.b_plus = self.propagation_matrix * self.a_plus
-        self.b_minus = self.inv_proagation_matrix * self.a_minus
+        self.b_plus: Matrix = self.propagation_matrix * self.a_plus
+        self.b_minus: Matrix = self.inv_proagation_matrix * self.a_minus
         logger.debug(f"Parameters set for member {self.id}")
 
     def get_all_parameters(self) -> List[symbols]:
         return self.params
 
-    def get_parameters(self, id: int = None) -> list:
+    def get_parameters(self, w: float, id: int = None) -> list:
         """This function gives back the set of parameters to be used.
         It corrects for the sign convention of the constraint when returning parameters
         Positive direction is from lower to higher constraint id
         """
+        b_minus = self.b_minus.subs(self.omega, w)
+        b_plus = self.b_plus.subs(self.omega, w)
+        a_plus = self.a_plus.subs(self.omega, w)
+        a_minus = self.a_minus.subs(self.omega, w)
+
         if id == max(self.constraint_ids):
-            return [self.b_minus, self.b_plus]
+            return [b_minus, b_plus]
         else:
-            return [self.a_plus, self.a_minus]
+            return [a_plus, a_minus]

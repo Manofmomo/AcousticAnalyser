@@ -1,11 +1,12 @@
-from sympy import symbols, I, solve, Matrix
+from sympy import symbols, I, Matrix
+from sympy.core.parameters import evaluate
 from pickle import load as pickle_load
 from src.modules.member import member as member_type
 from typing import List, Tuple
 import logging
 
 logging.basicConfig(
-    level=logging.DEBUG, format="%(asctime)s %(name)s %(levelname)s:%(message)s"
+    level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s:%(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -15,9 +16,12 @@ a2, b2, c2, d2 = symbols("a_evanescent, b_evanescent, c_evanescent, d_evanescent
 density1, area1, E1, I1, L1, H1 = symbols("density1, area1, E1, I1, L1, H1")
 density2, area2, E2, I2, L2, H2 = symbols("density2, area2, E2, I2, L2, H2")
 theta_sym = symbols("theta")
+w_sym = symbols("w")
 
 
-def _subs(eqns: List[Matrix], m1: member_type, m2: member_type, theta: float) -> list:
+def _subs(
+    eqns: List[Matrix], m1: member_type, m2: member_type, theta: float, w: float
+) -> list:
     subs_dict = {
         density1: m1.density,
         area1: m1.cross_section_area,
@@ -32,6 +36,7 @@ def _subs(eqns: List[Matrix], m1: member_type, m2: member_type, theta: float) ->
         L2: m2.length,
         H2: m2.height,
         theta_sym: theta,
+        w_sym: w,
     }
     for i in range(len(eqns)):
         eqns[i] = eqns[i].subs(subs_dict)
@@ -68,11 +73,13 @@ def _get_soln(eqns: List[Matrix]) -> Tuple[Matrix]:
     )
 
 
-def get_rt_of_cross_section(m1: member_type, m2: member_type, theta: float) -> tuple:
+def get_rt_of_cross_section(
+    m1: member_type, m2: member_type, theta: float, w: float
+) -> tuple:
     file = open("src/equations/cross_section", mode="rb")
     eqns = pickle_load(file)
     logger.debug("Equation File Loaded")
-    eqns = _subs(eqns, m1, m2, theta)
+    eqns = _subs(eqns, m1, m2, theta, w)
     logger.debug("M0-M6 N0-N6 Substituted")
     reflection_transmission = _get_soln(eqns)
     logger.debug("Reflection Transmission Calculated")

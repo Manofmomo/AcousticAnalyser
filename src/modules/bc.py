@@ -16,7 +16,7 @@ class bc:
         if type(member) != member_type:
             raise Exception("members must belong to class Member")
         if not member.check_constraint_count():
-            raise Exception(f"Member {member.member_number} already has 2 joints/BCs")
+            raise Exception(f"Member {member.id} already has 2 joints/BCs")
         member.increment_constraint_count()
         member.add_constraint(id=id)
         self.member = member

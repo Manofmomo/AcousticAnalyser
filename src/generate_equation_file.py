@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 def get_equation_free_end() -> sympy.Matrix:
-    reflection = sympy.Matrix([[-I, -1 + I, 0], [1 - I, I, 0], [0, 0, 1]])
+    reflection = sympy.Matrix([[-I, 1 + I, 0], [1 - I, I, 0], [0, 0, 1]])
 
     return reflection
 

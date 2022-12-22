@@ -53,7 +53,7 @@ class two_member(joint):
     def get_equations(self, w: float) -> list:
         """Gets the equations from the reflection and transmission matrices"""
         a_plus, a_minus = self.members[0].get_parameters(id=self.id, w=w)
-        b_plus, b_minus = self.members[1].get_parameters(id=self.id, w=w)
+        b_minus, b_plus = self.members[1].get_parameters(id=self.id, w=w)
 
         self.set_rt_matrices(w=w)
 

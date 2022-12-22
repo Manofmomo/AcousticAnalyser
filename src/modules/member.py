@@ -61,11 +61,11 @@ class member:
     def set_propagation_matrice(self):
         w = self.omega
         C = (self.youngs_modulus / self.density) ** 0.5
-        K = (self.length / self.cross_section_area) ** 0.5
+        K = (self.inertia / self.cross_section_area) ** 0.5
 
         alpha = (w * K / C) ** 0.5
         beta = w * K / C
-        L_bar = self.length
+        L_bar = self.length / K
 
         self.propagation_matrix = Matrix(
             [
@@ -89,19 +89,37 @@ class member:
                 i=self.id
             )
         )
-        self.params = [a_b_plus, a_e_plus, a_b_minus, a_e_minus, a_l_plus, a_l_minus]
+        b_b_plus, b_e_plus, b_b_minus, b_e_minus, b_l_plus, b_l_minus = symbols(
+            "b_b^+{i}, b_e^+{i}, b_b^-{i}, b_e^-{i}, b_l^+{i}, b_l^-{i}".format(
+                i=self.id
+            )
+        )
+        self.params = [
+            a_b_plus,
+            a_e_plus,
+            a_b_minus,
+            a_e_minus,
+            a_l_plus,
+            a_l_minus,
+            b_b_plus,
+            b_e_plus,
+            b_b_minus,
+            b_e_minus,
+            b_l_plus,
+            b_l_minus,
+        ]
 
         self.a_plus = Matrix([a_b_plus, a_e_plus, a_l_plus])
         self.a_minus = Matrix([a_b_minus, a_e_minus, a_l_minus])
 
-        self.b_plus: Matrix = self.propagation_matrix * self.a_plus
-        self.b_minus: Matrix = self.inv_proagation_matrix * self.a_minus
+        self.b_plus: Matrix = Matrix([b_b_plus, b_e_plus, b_l_plus])
+        self.b_minus: Matrix = Matrix([b_b_minus, b_e_minus, b_l_minus])
         logger.debug(f"Parameters set for member {self.id}")
 
     def get_all_parameters(self) -> List[symbols]:
         return self.params
 
-    def get_parameters(self, w: float, id: int = None) -> list:
+    def get_parameters(self, w: float, id: int) -> list:
         """This function gives back the set of parameters to be used.
         It corrects for the sign convention of the constraint when returning parameters
         Positive direction is from lower to higher constraint id
@@ -112,6 +130,18 @@ class member:
         a_minus = self.a_minus.subs(self.omega, w)
 
         if id == max(self.constraint_ids):
-            return [b_minus, b_plus]
+            return [b_plus, b_minus]
         else:
-            return [a_plus, a_minus]
+            return [a_minus, a_plus]
+
+    def get_equations(self, w: float):
+        propagation_matrix_subs = self.propagation_matrix.subs(self.omega, w)
+        inv_proagation_matrix_subs = self.inv_proagation_matrix.subs(self.omega, w)
+        matrix_forward = propagation_matrix_subs * self.a_plus - self.b_plus
+        matrix_backward = inv_proagation_matrix_subs * self.b_minus - self.a_minus
+        logger.debug(
+            f"Propagation and Backword propagation for id:{self.id} calculated"
+        )
+        eqns = matrix_forward.col_join(matrix_backward)
+        logger.debug(eqns[0])
+        return eqns

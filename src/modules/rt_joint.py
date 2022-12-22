@@ -6,7 +6,7 @@ from typing import List, Tuple
 import logging
 
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s:%(message)s"
+    level=logging.DEBUG, format="%(asctime)s %(name)s %(levelname)s:%(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -18,6 +18,10 @@ density2, area2, E2, I2, L2, H2 = symbols("density2, area2, E2, I2, L2, H2")
 theta_sym = symbols("theta")
 w_sym = symbols("w")
 
+file = open("src/equations/cross_section", mode="rb")
+eqns = pickle_load(file)
+logger.debug("Equation File Loaded")
+file.close()
 
 def _subs(
     eqns: List[Matrix], m1: member_type, m2: member_type, theta: float, w: float
@@ -76,9 +80,7 @@ def _get_soln(eqns: List[Matrix]) -> Tuple[Matrix]:
 def get_rt_of_cross_section(
     m1: member_type, m2: member_type, theta: float, w: float
 ) -> tuple:
-    file = open("src/equations/cross_section", mode="rb")
-    eqns = pickle_load(file)
-    logger.debug("Equation File Loaded")
+    global eqns
     eqns = _subs(eqns, m1, m2, theta, w)
     logger.debug("M0-M6 N0-N6 Substituted")
     reflection_transmission = _get_soln(eqns)

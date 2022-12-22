@@ -10,7 +10,7 @@ from typing import Dict
 import numpy as np
 
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s:%(message)s"
+    level=logging.DEBUG, format="%(asctime)s %(name)s %(levelname)s:%(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -141,7 +141,7 @@ class frame:
         for member in self.members.values():
             self.params.extend(member.get_all_parameters())
 
-    def get_equation_matrix(self, w: float):
+    def get_equation_matrix(self, w:float):
         """This function is responsible for collecting the equations from the constraints and constructing the desired matrix from them"""
         self._set_params()
 

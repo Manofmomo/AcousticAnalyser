@@ -8,20 +8,20 @@ import logging
 
 #%%
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s:%(message)s"
+    level=logging.DEBUG, format="%(asctime)s %(name)s %(levelname)s:%(message)s"
 )
 logger = logging.getLogger(__name__)
 # This initial code is developed using Euler-Bernoulli beam mode
 
 
 def get_equation_free_end() -> sympy.Matrix:
-    reflection = sympy.Matrix([[-I, -1 + I, 0], [-1 + I, I, 0], [0, 0, -1]])
+    reflection = sympy.Matrix([[-I, -1 + I, 0], [1 - I, I, 0], [0, 0, 1]])
 
     return reflection
 
 
 def get_equation_fixed_end() -> sympy.Matrix:
-    reflection = sympy.Matrix([[-I, -1 + I, 0], [1 - I, I, 0], [0, 0, 1]])
+    reflection = sympy.Matrix([[-I, -1 - I, 0], [-1 + I, I, 0], [0, 0, -1]])
 
     return reflection
 

@@ -141,7 +141,7 @@ class frame:
         for member in self.members.values():
             self.params.extend(member.get_all_parameters())
 
-    def get_equation_matrix(self, w:float):
+    def get_equation_matrix(self, w: float):
         """This function is responsible for collecting the equations from the constraints and constructing the desired matrix from them"""
         self._set_params()
 

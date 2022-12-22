@@ -10,6 +10,7 @@ file = open("src/equations/free_end", mode="rb")
 reflection_free = pickle_load(file)
 file.close()
 
+
 def get_r_of_free_end(m1: member_type) -> Matrix:
     return reflection_free
 

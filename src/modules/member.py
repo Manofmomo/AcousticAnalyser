@@ -44,7 +44,7 @@ class member:
 
         self.set_propagation_matrice()
         self.set_parameters()
-    
+
     def check_constraint_count(self) -> bool:
         """Each member can have only 2 constraints added to it at present"""
         if self.constraint_count < 2:
@@ -94,14 +94,14 @@ class member:
         self.a_plus = Matrix([a_b_plus, a_e_plus, a_l_plus])
         self.a_minus = Matrix([a_b_minus, a_e_minus, a_l_minus])
 
-        self.b_plus : Matrix = self.propagation_matrix * self.a_plus
-        self.b_minus : Matrix = self.inv_proagation_matrix * self.a_minus
+        self.b_plus: Matrix = self.propagation_matrix * self.a_plus
+        self.b_minus: Matrix = self.inv_proagation_matrix * self.a_minus
         logger.debug(f"Parameters set for member {self.id}")
 
     def get_all_parameters(self) -> List[symbols]:
         return self.params
 
-    def get_parameters(self, w : float, id: int = None) -> list:
+    def get_parameters(self, w: float, id: int = None) -> list:
         """This function gives back the set of parameters to be used.
         It corrects for the sign convention of the constraint when returning parameters
         Positive direction is from lower to higher constraint id

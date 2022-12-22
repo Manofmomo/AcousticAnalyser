@@ -32,7 +32,7 @@ class free_end(bc):
 
         logger.debug(f"Reflection Matrix for free_end {self.id} calculated")
 
-    def get_equations(self, w : float) -> list:
+    def get_equations(self, w: float) -> list:
         a_plus, a_minus = self.member.get_parameters(id=self.id, w=w)
 
         matrix_reflect = self.reflection_matrix * a_plus - a_minus
@@ -49,7 +49,7 @@ class fixed_end(bc):
 
         logger.debug(f"Reflection Matrix for free_end {self.id} calculated")
 
-    def get_equations(self, w : float) -> list:
+    def get_equations(self, w: float) -> list:
         """Gets the equations from the reflection and transmission matrices"""
         a_plus, a_minus = self.member.get_parameters(id=self.id, w=w)
 

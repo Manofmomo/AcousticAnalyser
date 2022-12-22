@@ -23,6 +23,7 @@ eqns = pickle_load(file)
 logger.debug("Equation File Loaded")
 file.close()
 
+
 def _subs(
     eqns: List[Matrix], m1: member_type, m2: member_type, theta: float, w: float
 ) -> list:
@@ -70,10 +71,10 @@ def _get_soln(eqns: List[Matrix]) -> Tuple[Matrix]:
     logger.debug("reflection_matrix_22 Calculated")
 
     return (
-        reflection_matrix_11,
-        reflection_matrix_22,
-        transmission_matrix_12,
-        transmission_matrix_21,
+        reflection_matrix_11.evalf(),
+        reflection_matrix_22.evalf(),
+        transmission_matrix_12.evalf(),
+        transmission_matrix_21.evalf(),
     )
 
 

@@ -145,12 +145,13 @@ class frame:
         """This function is responsible for collecting the equations from the constraints and constructing the desired matrix from them"""
         self._set_params()
 
-        eqns = []
+        eqns = Matrix([])
         for constraint in self.constraints:
-            eqns.extend(list(constraint.get_equations(w=w)))
+            eqns = eqns.col_join(constraint.get_equations(w=w))
         for member in self.members.values():
-            eqns.extend(list(member.get_equations(w=w)))
+            eqns = eqns.col_join(member.get_equations(w=w))
         logger.debug("All Equations Fetched")
+        self.eqn_matrix = eqns
         for eqn in eqns:
             logger.debug(eqn.expand())
         coeff_matrix = get_coefficient_matrix(eqns=eqns, params=self.params)

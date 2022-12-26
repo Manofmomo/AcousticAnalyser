@@ -43,10 +43,11 @@ def _subs(
         theta_sym: theta,
         w_sym: w,
     }
+    eqns_subs: List[Matrix] = [None] * len(eqns)
     for i in range(len(eqns)):
-        eqns[i] = eqns[i].subs(subs_dict)
-        eqns[i].simplify()
-    return eqns
+        eqns_subs[i] = eqns[i].subs(subs_dict)
+        eqns_subs[i].simplify()
+    return eqns_subs
 
 
 def _get_soln(eqns: List[Matrix]) -> Tuple[Matrix]:
@@ -82,8 +83,8 @@ def get_rt_of_cross_section(
     m1: member_type, m2: member_type, theta: float, w: float
 ) -> tuple:
     global eqns
-    eqns = _subs(eqns, m1, m2, theta, w)
+    eqns_subs = _subs(eqns, m1, m2, theta, w)
     logger.debug("M0-M6 N0-N6 Substituted")
-    reflection_transmission = _get_soln(eqns)
+    reflection_transmission = _get_soln(eqns_subs)
     logger.debug("Reflection Transmission Calculated")
     return reflection_transmission

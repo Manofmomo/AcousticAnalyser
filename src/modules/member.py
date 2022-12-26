@@ -124,21 +124,17 @@ class member:
         It corrects for the sign convention of the constraint when returning parameters
         Positive direction is from lower to higher constraint id
         """
-        b_minus = self.b_minus.subs(self.omega, w)
-        b_plus = self.b_plus.subs(self.omega, w)
-        a_plus = self.a_plus.subs(self.omega, w)
-        a_minus = self.a_minus.subs(self.omega, w)
 
         if id == max(self.constraint_ids):
-            return [b_plus, b_minus]
+            return [self.b_plus, self.b_minus]
         else:
-            return [a_minus, a_plus]
+            return [self.a_minus, self.a_plus]
 
     def get_equations(self, w: float):
-        propagation_matrix_subs = self.propagation_matrix.subs(self.omega, w)
-        inv_proagation_matrix_subs = self.inv_proagation_matrix.subs(self.omega, w)
-        matrix_forward = propagation_matrix_subs * self.a_plus - self.b_plus
-        matrix_backward = inv_proagation_matrix_subs * self.b_minus - self.a_minus
+        self.propagation_matrix_subs = self.propagation_matrix.subs(self.omega, w)
+        self.inv_proagation_matrix_subs = self.inv_proagation_matrix.subs(self.omega, w)
+        matrix_forward = self.propagation_matrix_subs * self.a_plus - self.b_plus
+        matrix_backward = self.propagation_matrix_subs * self.b_minus - self.a_minus
         logger.debug(
             f"Propagation and Backword propagation for id:{self.id} calculated"
         )

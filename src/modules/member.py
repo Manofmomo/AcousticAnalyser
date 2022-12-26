@@ -74,13 +74,6 @@ class member:
                 [0, 0, E ** (-I * beta * L_bar)],
             ]
         )
-        self.inv_proagation_matrix = Matrix(
-            [
-                [E ** (I * alpha * L_bar), 0, 0],
-                [0, E ** (alpha * L_bar), 0],
-                [0, 0, E ** (I * beta * L_bar)],
-            ]
-        )
         logger.debug(f"Propagation Matrix Calculated for member {self.id}")
 
     def set_parameters(self) -> None:
@@ -132,7 +125,6 @@ class member:
 
     def get_equations(self, w: float):
         self.propagation_matrix_subs = self.propagation_matrix.subs(self.omega, w)
-        self.inv_proagation_matrix_subs = self.inv_proagation_matrix.subs(self.omega, w)
         matrix_forward = self.propagation_matrix_subs * self.a_plus - self.b_plus
         matrix_backward = self.propagation_matrix_subs * self.b_minus - self.a_minus
         logger.debug(

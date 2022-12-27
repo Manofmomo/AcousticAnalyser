@@ -3,10 +3,7 @@ from src.modules.rt_bc import get_r_of_fixed_end, get_r_of_free_end
 from sympy import Matrix
 import logging
 
-logging.basicConfig(
-    level=logging.DEBUG, format="%(asctime)s %(name)s %(levelname)s:%(message)s"
-)
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("acoustic_analyser")
 
 
 class bc:

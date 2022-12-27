@@ -10,9 +10,9 @@ from typing import Dict
 import numpy as np
 
 logging.basicConfig(
-    level=logging.DEBUG, format="%(asctime)s %(name)s %(levelname)s:%(message)s"
+    level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s:%(message)s"
 )
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("acoustic_analyser")
 
 
 def get_coefficient_matrix(eqns: equation_type, params: list) -> Matrix:
@@ -32,15 +32,20 @@ class frame:
     It is the class the user directly interacts with
     """
 
-    def __init__(self) -> None:
+    def __init__(self, debug: bool = False) -> None:
+        if debug:
+            logger.setLevel(logging.DEBUG)
+        else:
+            logger.setLevel(logging.INFO)
+
         self.members: Dict[int, member_type] = {}
         self.constraints = []
         self.constraints_count = -1
         self.omega = symbols("w")
 
     @classmethod
-    def from_file(cls, member_file: str, constraint_file: str):
-        obj = cls()
+    def from_file(cls, member_file: str, constraint_file: str, debug: bool = False):
+        obj = cls(debug)
 
         with open(member_file, "r") as jsonfile:
             member_dict = json_load(jsonfile)

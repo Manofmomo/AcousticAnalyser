@@ -5,10 +5,7 @@ from src.modules.member import member as member_type
 from typing import List, Tuple
 import logging
 
-logging.basicConfig(
-    level=logging.DEBUG, format="%(asctime)s %(name)s %(levelname)s:%(message)s"
-)
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("acoustic_analyser")
 
 
 a1, b1, c1, d1 = symbols("a_traveling,  b_traveling, c_traveling, d_traveling")
@@ -20,7 +17,7 @@ w_sym = symbols("w")
 
 file = open("src/equations/cross_section", mode="rb")
 eqns = pickle_load(file)
-logger.debug("Equation File Loaded")
+logger.debug("Joint Equation Files Loaded")
 file.close()
 
 

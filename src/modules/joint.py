@@ -6,10 +6,7 @@ from typing import List
 from math import pi
 import logging
 
-logging.basicConfig(
-    level=logging.DEBUG, format="%(asctime)s %(name)s %(levelname)s:%(message)s"
-)
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("acoustic_analyser")
 
 
 class joint:

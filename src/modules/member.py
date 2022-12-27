@@ -2,10 +2,7 @@ from sympy import symbols, Matrix, I, E
 import logging
 from typing import List
 
-logging.basicConfig(
-    level=logging.DEBUG, format="%(asctime)s %(name)s %(levelname)s:%(message)s"
-)
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("acoustic_analyser")
 
 
 class member:
@@ -127,9 +124,6 @@ class member:
         self.propagation_matrix_subs = self.propagation_matrix.subs(self.omega, w)
         matrix_forward = self.propagation_matrix_subs * self.a_plus - self.b_plus
         matrix_backward = self.propagation_matrix_subs * self.b_minus - self.a_minus
-        logger.debug(
-            f"Propagation and Backword propagation for id:{self.id} calculated"
-        )
+        logger.debug(f"Propagation for id:{self.id} calculated")
         eqns = matrix_forward.col_join(matrix_backward)
-        logger.debug(eqns[0])
         return eqns

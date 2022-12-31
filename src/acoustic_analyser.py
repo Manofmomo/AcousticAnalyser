@@ -1,13 +1,14 @@
 from itertools import count
 from src.modules import joint, bc
 from sympy.core.add import Add as equation_type
-from sympy import symbols, Matrix
+from sympy import symbols, Matrix, linear_eq_to_matrix
 from src.modules.member import member as member_type
 from json import load as json_load
 from csv import reader as csv_load
 import logging
-from typing import Dict
+from typing import Dict, List
 import numpy as np
+from matplotlib import pyplot as plt
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s:%(message)s"
@@ -162,3 +163,82 @@ class frame:
         coeff_matrix = get_coefficient_matrix(eqns=eqns, params=self.params)
         logger.debug("Equation Coefficent Matrix generated")
         return coeff_matrix
+
+    def get_determinant(self, w: float) -> complex:
+        """Returns the determinant of the A matrix given omega"""
+        return np.linalg.det(self.get_equation_matrix(w=w))
+
+    def get_frequency_graph(
+        self, lower_limit: float, upper_limit: float, step_size: float
+    ) -> np.array:
+        "Creates a graph of the real and imaginary components of the determinant"
+        freq = np.arange(lower_limit, upper_limit, step_size)
+        output = np.zeros(len(freq), dtype=np.complex_)
+        omega = freq * np.pi * 2
+
+        for i in range(len(freq)):
+            output[i] = self.get_determinant(w=omega[i])
+            print(f"{i}/{len(freq)}\t", end="\r")
+
+        plt.plot(freq, np.real(output))
+        plt.plot(freq, np.imag(output))
+        plt.plot([lower_limit, upper_limit], [0, 0], "--")
+        plt.legend(["Real", "Imaginary"])
+        plt.show()
+        return output
+
+    def get_natural_frequency(
+        self,
+        lower_limit: float,
+        upper_limit: float,
+        precision: float = 0.01,
+        max_iter: int = 100,
+    ) -> float:
+        """Takes in the upper and lower limit of frequency between which it searches for the natural frequency of the structure.
+        The natural frequency must lie between the two limits.
+        """
+        freq_1 = lower_limit
+        freq_2 = upper_limit
+
+        iter = 0
+        Handle = True
+        omega = lambda freq: freq * np.pi * 2
+
+        def sign_check(output_1: complex, output_2: complex) -> bool:
+            real_sign = np.sign(np.real(output_1) / np.real(output_2))
+            imag_sign = np.sign(np.imag(output_1) / np.imag(output_2))
+            if real_sign <= 0 and imag_sign < 0:
+                return True
+            else:
+                return False
+
+        output_1 = self.get_determinant(w=omega(freq=freq_1))
+        output_2 = self.get_determinant(w=omega(freq=freq_2))
+
+        while Handle:
+            iter = iter + 1
+            if iter > max_iter:
+                Handle = False
+
+            freq_12 = (freq_1 + freq_2) / 2
+            output_12 = self.get_determinant(w=omega(freq=freq_12))
+
+            if np.isclose(abs(output_12), 0) or (freq_2 - freq_1) < precision:
+                Handle = False
+
+            if sign_check(output_1, output_12):
+                freq_2 = freq_12
+            elif sign_check(output_2, output_12):
+                freq_1 = freq_12
+            else:
+                logger.error("Lower and upper limits have the sign")
+                Handle = False
+
+            output_1 = self.get_determinant(w=omega(freq=freq_1))
+            output_2 = self.get_determinant(w=omega(freq=freq_2))
+
+            print(
+                f"Iteration: {iter}, Det: {abs(output_12)}, freq: {freq_12}\t", end="\r"
+            )
+
+        return (freq_1 + freq_2) / 2

@@ -1,7 +1,6 @@
-from itertools import count
 from src.modules import joint, bc
 from sympy.core.add import Add as equation_type
-from sympy import symbols, Matrix, linear_eq_to_matrix
+from sympy import symbols, Matrix
 from src.modules.member import member as member_type
 from json import load as json_load
 from csv import reader as csv_load
@@ -9,6 +8,8 @@ import logging
 from typing import Dict, List
 import numpy as np
 from matplotlib import pyplot as plt
+from scipy.sparse.linalg import eigs
+import itertools
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s:%(message)s"
@@ -185,6 +186,10 @@ class frame:
         plt.plot([lower_limit, upper_limit], [0, 0], "--")
         plt.legend(["Real", "Imaginary"])
         plt.show()
+        plt.figure()
+        plt.plot(freq, np.abs(output))
+        plt.legend(["Abs"])
+        plt.show()
         return output
 
     def get_natural_frequency(
@@ -231,8 +236,9 @@ class frame:
             elif sign_check(output_2, output_12):
                 freq_1 = freq_12
             else:
-                logger.error("Lower and upper limits have the sign")
+                logger.error("There is no solution between these points")
                 Handle = False
+                return None
 
             output_1 = self.get_determinant(w=omega(freq=freq_1))
             output_2 = self.get_determinant(w=omega(freq=freq_2))
@@ -242,3 +248,16 @@ class frame:
             )
 
         return (freq_1 + freq_2) / 2
+
+    def get_params_solution(self, natural_freq, atol=1e-03,rtol=1e-03) -> Dict:
+        """ Using the natural frequncy and computes the parameters by finding eigenvector for the eigenvalue 0
+        """
+        matrix = self.get_equation_matrix(w=2*np.pi*natural_freq)
+        val, vec = eigs(matrix,k=1,sigma=0)
+        val = val[0]
+
+        assert np.isclose(val,0,atol=atol,rtol=rtol)==True , "The value provided is not a natural frequency"
+        
+        self.params_subs = dict(zip(self.params,itertools.chain.from_iterable(vec)))
+        return self.params_subs
+        

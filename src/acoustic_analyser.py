@@ -10,6 +10,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from scipy.sparse.linalg import eigs
 import itertools
+from scipy.optimize import newton
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s:%(message)s"
@@ -39,7 +40,7 @@ class frame:
             logger.setLevel(logging.DEBUG)
         else:
             logger.setLevel(logging.INFO)
-
+        self.debug = debug
         self.members: Dict[int, member_type] = {}
         self.constraints = []
         self.constraints_count = -1
@@ -167,7 +168,9 @@ class frame:
 
     def get_determinant(self, w: float) -> complex:
         """Returns the determinant of the A matrix given omega"""
-        return np.linalg.det(self.get_equation_matrix(w=w))
+        det = np.linalg.det(self.get_equation_matrix(w=w))
+        print(det)
+        return det
 
     def get_frequency_graph(
         self, lower_limit: float, upper_limit: float, step_size: float
@@ -192,7 +195,17 @@ class frame:
         plt.show()
         return output
 
-    def get_natural_frequency(
+    def get_natural_frequency_newton(
+        self,
+        initial_guess: float,
+        tol: float = 1e-09,
+        max_iter: int = 100,
+    ) -> float:
+        """Takes in the a initial guess and uses newton raphson method to solve for natural frequency"""
+        get_determinant = lambda x: self.get_determinant(w=np.abs(x) * 2 * np.pi)
+        return np.abs(newton(get_determinant, initial_guess, tol=tol, maxiter=max_iter))
+
+    def get_natural_frequency_bisect(
         self,
         lower_limit: float,
         upper_limit: float,
@@ -249,15 +262,15 @@ class frame:
 
         return (freq_1 + freq_2) / 2
 
-    def get_params_solution(self, natural_freq, atol=1e-03,rtol=1e-03) -> Dict:
-        """ Using the natural frequncy and computes the parameters by finding eigenvector for the eigenvalue 0
-        """
-        matrix = self.get_equation_matrix(w=2*np.pi*natural_freq)
-        val, vec = eigs(matrix,k=1,sigma=0)
+    def get_params_solution(self, natural_freq, atol=1e-03, rtol=1e-03) -> Dict:
+        """Using the natural frequncy and computes the parameters by finding eigenvector for the eigenvalue 0"""
+        matrix = self.get_equation_matrix(w=2 * np.pi * natural_freq)
+        val, vec = eigs(matrix, k=1, sigma=0)
         val = val[0]
 
-        assert np.isclose(val,0,atol=atol,rtol=rtol)==True , "The value provided is not a natural frequency"
-        
-        self.params_subs = dict(zip(self.params,itertools.chain.from_iterable(vec)))
+        assert (
+            np.isclose(val, 0, atol=atol, rtol=rtol) == True
+        ), "The value provided is not a natural frequency"
+
+        self.params_subs = dict(zip(self.params, itertools.chain.from_iterable(vec)))
         return self.params_subs
-        

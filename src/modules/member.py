@@ -127,3 +127,9 @@ class member:
         logger.debug(f"Propagation for id:{self.id} calculated")
         eqns = matrix_forward.col_join(matrix_backward)
         return eqns
+
+    def get_non_dimensional_freq(self, w: float) -> float:
+        C = (self.youngs_modulus / self.density) ** 0.5
+        K1 = (self.inertia / self.cross_section_area) ** 0.5
+        omega = (w * K1 / C) ** 0.5
+        return omega

@@ -39,7 +39,6 @@ class member:
         self.constraint_count = 0
         self.constraint_ids = []
 
-        self.set_propagation_matrice()
         self.set_parameters()
 
     def check_constraint_count(self) -> bool:
@@ -55,16 +54,15 @@ class member:
     def add_constraint(self, id):
         self.constraint_ids.append(id)
 
-    def set_propagation_matrice(self):
-        w = self.omega
+    def get_propagation_matrix(self, w: float, length: float):
         C = (self.youngs_modulus / self.density) ** 0.5
         K = (self.inertia / self.cross_section_area) ** 0.5
 
         alpha = (w * K / C) ** 0.5
         beta = w * K / C
-        L_bar = self.length / K
+        L_bar = length / K
 
-        self.propagation_matrix = Matrix(
+        propagation_matrix = Matrix(
             [
                 [E ** (-I * alpha * L_bar), 0, 0],
                 [0, E ** (-alpha * L_bar), 0],
@@ -72,6 +70,7 @@ class member:
             ]
         )
         logger.debug(f"Propagation Matrix Calculated for member {self.id}")
+        return propagation_matrix
 
     def set_parameters(self) -> None:
         a_b_plus, a_e_plus, a_b_minus, a_e_minus, a_l_plus, a_l_minus = symbols(
@@ -121,7 +120,7 @@ class member:
             return [self.a_minus, self.a_plus]
 
     def get_equations(self, w: float):
-        self.propagation_matrix_subs = self.propagation_matrix.subs(self.omega, w)
+        self.propagation_matrix_subs = self.get_propagation_matrix(w=w, length=self.length)
         matrix_forward = self.propagation_matrix_subs * self.a_plus - self.b_plus
         matrix_backward = self.propagation_matrix_subs * self.b_minus - self.a_minus
         logger.debug(f"Propagation for id:{self.id} calculated")
@@ -133,3 +132,17 @@ class member:
         K1 = (self.inertia / self.cross_section_area) ** 0.5
         omega = (w * K1 / C) ** 0.5
         return omega
+
+    def get_deformation(self, w: float, length: float,subs_dict:dict, id: int) -> List[float]:
+        if id == max(self.constraint_ids):
+            length=self.length-length
+
+        propagation_matrix_subs = self.get_propagation_matrix(w=w,length=length)
+        propagation_matrix_inv_subs = propagation_matrix_subs.inv()
+        a_plus_subs = self.a_plus.subs(subs_dict)
+        a_minus_subs = self.a_minus.subs(subs_dict)
+
+        v = (Matrix([1,1,0]).T*propagation_matrix_subs*a_plus_subs + Matrix([1,1,0]).T*propagation_matrix_inv_subs*a_minus_subs).evalf()
+        u = (Matrix([0,0,1]).T*propagation_matrix_subs*a_plus_subs + Matrix([0,0,1]).T*propagation_matrix_inv_subs*a_minus_subs).evalf()
+
+        return [v[0],u[0]]

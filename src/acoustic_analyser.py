@@ -169,7 +169,6 @@ class frame:
     def get_determinant(self, w: float) -> complex:
         """Returns the determinant of the A matrix given omega"""
         det = np.linalg.det(self.get_equation_matrix(w=w))
-        print(det)
         return det
 
     def get_frequency_graph(

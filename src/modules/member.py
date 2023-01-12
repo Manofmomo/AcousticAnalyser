@@ -1,6 +1,7 @@
 from sympy import symbols, Matrix, I, E
 import logging
 from typing import List
+import numpy as np
 
 logger = logging.getLogger("acoustic_analyser")
 
@@ -54,7 +55,9 @@ class member:
     def add_constraint(self, id):
         self.constraint_ids.append(id)
 
-    def get_propagation_matrix(self, w: float, length: float):
+    def get_propagation_matrix(self, w: float, lengths: List[float]):
+        length = np.array(lengths)
+        w = w
         C = (self.youngs_modulus / self.density) ** 0.5
         K = (self.inertia / self.cross_section_area) ** 0.5
 
@@ -62,13 +65,14 @@ class member:
         beta = w * K / C
         L_bar = length / K
 
-        propagation_matrix = Matrix(
+        propagation_matrix_finder = lambda x: np.array(
             [
-                [E ** (-I * alpha * L_bar), 0, 0],
-                [0, E ** (-alpha * L_bar), 0],
-                [0, 0, E ** (-I * beta * L_bar)],
+                [np.e ** (-1j * alpha * x), 0, 0],
+                [0, np.e ** (-alpha * x), 0],
+                [0, 0, np.e ** (-1j * beta * x)],
             ]
         )
+        propagation_matrix = np.stack([propagation_matrix_finder(x) for x in L_bar])
         logger.debug(f"Propagation Matrix Calculated for member {self.id}")
         return propagation_matrix
 
@@ -120,7 +124,9 @@ class member:
             return [self.a_minus, self.a_plus]
 
     def get_equations(self, w: float):
-        self.propagation_matrix_subs = self.get_propagation_matrix(w=w, length=self.length)
+        self.propagation_matrix_subs = self.get_propagation_matrix(
+            w=w, lengths=[self.length]
+        )[0]
         matrix_forward = self.propagation_matrix_subs * self.a_plus - self.b_plus
         matrix_backward = self.propagation_matrix_subs * self.b_minus - self.a_minus
         logger.debug(f"Propagation for id:{self.id} calculated")
@@ -133,16 +139,26 @@ class member:
         omega = (w * K1 / C) ** 0.5
         return omega
 
-    def get_deformation(self, w: float, length: float,subs_dict:dict, id: int) -> List[float]:
+    def get_deformation(
+        self, w: float, lengths: List[float], subs_dict: dict, id: int
+    ) -> List[float]:
+        lengths = np.array(lengths)
         if id == max(self.constraint_ids):
-            length=self.length-length
+            lengths = self.length - lengths
 
-        propagation_matrix_subs = self.get_propagation_matrix(w=w,length=length)
-        propagation_matrix_inv_subs = propagation_matrix_subs.inv()
-        a_plus_subs = self.a_plus.subs(subs_dict)
-        a_minus_subs = self.a_minus.subs(subs_dict)
+        propagation_matrix_subs = self.get_propagation_matrix(w=w, lengths=lengths)
+        propagation_matrix_inv_subs = np.linalg.inv(propagation_matrix_subs)
+        a_plus_subs = np.matrix(self.a_plus.subs(subs_dict), dtype=complex)
+        a_minus_subs = np.matrix(self.a_minus.subs(subs_dict), dtype=complex)
 
-        v = (Matrix([1,1,0]).T*propagation_matrix_subs*a_plus_subs + Matrix([1,1,0]).T*propagation_matrix_inv_subs*a_minus_subs).evalf()
-        u = (Matrix([0,0,1]).T*propagation_matrix_subs*a_plus_subs + Matrix([0,0,1]).T*propagation_matrix_inv_subs*a_minus_subs).evalf()
-
-        return [v[0],u[0]]
+        v = (
+            np.matmul(np.array([1, 1, 0]), propagation_matrix_subs) * a_plus_subs
+            + np.matmul(np.array([1, 1, 0]), propagation_matrix_inv_subs) * a_minus_subs
+        )
+        u = (
+            np.matmul(np.array([0, 0, 1]), propagation_matrix_subs) * a_plus_subs
+            + np.matmul(np.array([0, 0, 1]), propagation_matrix_inv_subs) * a_minus_subs
+        )
+        v = np.array(v).reshape(len(lengths))
+        u = np.array(u).reshape(len(lengths))
+        return [v, u]

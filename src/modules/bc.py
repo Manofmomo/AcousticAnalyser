@@ -2,6 +2,7 @@ from src.modules.member import member as member_type
 from src.modules.rt_bc import get_r_of_fixed_end, get_r_of_free_end
 from sympy import Matrix
 import logging
+from typing import List
 
 logger = logging.getLogger("acoustic_analyser")
 
@@ -16,8 +17,9 @@ class bc:
             raise Exception(f"Member {member.id} already has 2 joints/BCs")
         member.increment_constraint_count()
         member.add_constraint(id=id)
-        self.member = member
+        self.members: List[member_type] = [member]
         self.id = id
+        self.theta = 0
 
 
 class free_end(bc):
@@ -30,7 +32,7 @@ class free_end(bc):
         logger.debug(f"Reflection Matrix for free_end {self.id} calculated")
 
     def get_equations(self, w: float) -> list:
-        a_plus, a_minus = self.member.get_parameters(id=self.id, w=w)
+        a_plus, a_minus = self.members[0].get_parameters(id=self.id, w=w)
 
         matrix_reflect = self.reflection_matrix * a_plus - a_minus
 
@@ -48,7 +50,7 @@ class fixed_end(bc):
 
     def get_equations(self, w: float) -> list:
         """Gets the equations from the reflection and transmission matrices"""
-        a_plus, a_minus = self.member.get_parameters(id=self.id, w=w)
+        a_plus, a_minus = self.members[0].get_parameters(id=self.id, w=w)
 
         matrix_reflect = self.reflection_matrix * a_plus - a_minus
 

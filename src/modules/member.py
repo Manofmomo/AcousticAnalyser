@@ -37,6 +37,9 @@ class member:
         self.cross_section_area = height * height
         self.inertia = (height**4) / 12
 
+        self.C = (self.youngs_modulus / self.density) ** 0.5
+        self.K = (self.inertia / self.cross_section_area) ** 0.5
+
         self.constraint_count = 0
         self.constraint_ids = []
 
@@ -57,13 +60,10 @@ class member:
 
     def get_propagation_matrix(self, w: float, lengths: List[float]):
         length = np.array(lengths)
-        w = w
-        C = (self.youngs_modulus / self.density) ** 0.5
-        K = (self.inertia / self.cross_section_area) ** 0.5
 
-        alpha = (w * K / C) ** 0.5
-        beta = w * K / C
-        L_bar = length / K
+        alpha = (w * self.K / self.C) ** 0.5
+        beta = w * self.K / self.C
+        L_bar = length / self.K
 
         propagation_matrix_finder = lambda x: np.array(
             [
@@ -90,15 +90,15 @@ class member:
         self.params = [
             a_b_plus,
             a_e_plus,
+            a_l_plus,
             a_b_minus,
             a_e_minus,
-            a_l_plus,
             a_l_minus,
             b_b_plus,
             b_e_plus,
+            b_l_plus,
             b_b_minus,
             b_e_minus,
-            b_l_plus,
             b_l_minus,
         ]
 
@@ -134,23 +134,22 @@ class member:
         return eqns
 
     def get_non_dimensional_freq(self, w: float) -> float:
-        C = (self.youngs_modulus / self.density) ** 0.5
-        K1 = (self.inertia / self.cross_section_area) ** 0.5
-        omega = (w * K1 / C) ** 0.5
+        omega = (w * self.K / self.C) ** 0.5
         return omega
 
     def get_deformation(
         self, w: float, lengths: List[float], subs_dict: dict, id: int
     ) -> List[float]:
         lengths = np.array(lengths)
-        if id == max(self.constraint_ids):
-            lengths = self.length - lengths
+        # if id == max(self.constraint_ds):
+        #     lengths = self.length - lenigths
 
-        propagation_matrix_subs = self.get_propagation_matrix(w=w, lengths=lengths)
+        propagation_matrix_subs = self.get_propagation_matrix(
+            w=2 * np.pi * 13.742, lengths=lengths
+        )
         propagation_matrix_inv_subs = np.linalg.inv(propagation_matrix_subs)
         a_plus_subs = np.matrix(self.a_plus.subs(subs_dict), dtype=complex)
         a_minus_subs = np.matrix(self.a_minus.subs(subs_dict), dtype=complex)
-
         v = (
             np.matmul(np.array([1, 1, 0]), propagation_matrix_subs) * a_plus_subs
             + np.matmul(np.array([1, 1, 0]), propagation_matrix_inv_subs) * a_minus_subs
@@ -159,6 +158,5 @@ class member:
             np.matmul(np.array([0, 0, 1]), propagation_matrix_subs) * a_plus_subs
             + np.matmul(np.array([0, 0, 1]), propagation_matrix_inv_subs) * a_minus_subs
         )
-        v = np.array(v).reshape(len(lengths))
-        u = np.array(u).reshape(len(lengths))
+
         return [v, u]

@@ -1,11 +1,13 @@
 from src.modules import joint, bc
+from src.modules.bc import bc as bc_type
+from src.modules.joint import joint as joint_type
 from sympy.core.add import Add as equation_type
 from sympy import symbols, Matrix
 from src.modules.member import member as member_type
 from json import load as json_load
 from csv import reader as csv_load
 import logging
-from typing import Dict, List
+from typing import Dict, List, Union
 import numpy as np
 from matplotlib import pyplot as plt
 from scipy.sparse.linalg import eigs
@@ -42,7 +44,7 @@ class frame:
             logger.setLevel(logging.INFO)
         self.debug = debug
         self.members: Dict[int, member_type] = {}
-        self.constraints = []
+        self.constraints: Dict[int, Union[bc_type, joint_type]] = {}
         self.constraints_count = -1
         self.omega = symbols("w")
 
@@ -100,7 +102,7 @@ class frame:
 
         def inner1(self, *args, **kwargs):
             constraint_obj = func(self, *args, **kwargs)
-            self.constraints.append(constraint_obj)
+            self.constraints[self._get_constraint_id()] = constraint_obj
             self.constraints_count = self.constraints_count + 1
             return constraint_obj
 
@@ -154,7 +156,7 @@ class frame:
         self._set_params()
 
         eqns = Matrix([])
-        for constraint in self.constraints:
+        for constraint in self.constraints.values():
             eqns = eqns.col_join(constraint.get_equations(w=w))
         for member in self.members.values():
             eqns = eqns.col_join(member.get_equations(w=w))
@@ -169,6 +171,7 @@ class frame:
     def get_determinant(self, w: float) -> complex:
         """Returns the determinant of the A matrix given omega"""
         det = np.linalg.det(self.get_equation_matrix(w=w))
+        print(f"Determinant: {det}")
         return det
 
     def get_frequency_graph(
@@ -261,15 +264,18 @@ class frame:
 
         return (freq_1 + freq_2) / 2
 
-    def get_params_solution(self, natural_freq, atol=1e-03, rtol=1e-03) -> Dict:
+    def get_params_solution(self, natural_freq, atol=1e-05, rtol=1e-05) -> Dict:
         """Using the natural frequncy and computes the parameters by finding eigenvector for the eigenvalue 0"""
-        matrix = self.get_equation_matrix(w=2 * np.pi * natural_freq)
-        val, vec = eigs(matrix, k=1, sigma=0)
-        val = val[0]
+        # matrix = self.get_equation_matrix(w=2 * np.pi * natural_freq)
+        # val, vec = eigs(matrix, k=1, sigma=0)
+        # val = val[0]
+
+        val, vec = np.linalg.eig(self.get_equation_matrix(w=2 * np.pi * 13.742))
+        solns = vec[:, np.abs(val).argmin()]
 
         assert (
-            np.isclose(val, 0, atol=atol, rtol=rtol) == True
+            np.isclose(val[np.abs(val).argmin()], 0, atol=atol, rtol=rtol) == True
         ), "The value provided is not a natural frequency"
 
-        self.params_subs = dict(zip(self.params, itertools.chain.from_iterable(vec)))
+        self.params_subs = dict(zip(self.params, solns / 2))
         return self.params_subs

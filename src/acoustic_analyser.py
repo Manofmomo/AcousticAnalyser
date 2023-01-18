@@ -169,10 +169,11 @@ class frame:
         logger.debug("Equation Coefficent Matrix generated")
         return coeff_matrix
 
-    def get_determinant(self, w: float) -> complex:
+    def get_determinant(self, w: float, print_det: bool = False) -> complex:
         """Returns the determinant of the A matrix given omega"""
         det = np.linalg.det(self.get_equation_matrix(w=w))
-        print(f"Determinant: {det}")
+        if print_det:
+            print(f"Determinant: {det}")
         return det
 
     def get_frequency_graph(
@@ -205,7 +206,9 @@ class frame:
         max_iter: int = 100,
     ) -> float:
         """Takes in the a initial guess and uses newton raphson method to solve for natural frequency"""
-        get_determinant = lambda x: self.get_determinant(w=np.abs(x) * 2 * np.pi)
+        get_determinant = lambda x: self.get_determinant(
+            w=np.abs(x) * 2 * np.pi, print_det=True
+        )
         return np.abs(newton(get_determinant, initial_guess, tol=tol, maxiter=max_iter))
 
     def get_natural_frequency_bisect(
@@ -278,26 +281,35 @@ class frame:
         self.params_subs = dict(zip(self.params, solns))
         return self.params_subs
 
-    def get_mode_shape(self, natural_freq : float, origin_constraint_id:int = None , step_size:float=0.01, scaling_factor:float=0.5) -> np.array:
+    def get_mode_shape(
+        self,
+        natural_freq: float,
+        origin_constraint_id: int = None,
+        step_size: float = 0.01,
+        scaling_factor: float = 0.5,
+    ) -> np.array:
         "Finds the mode shape of the frame and plots it"
         omega = natural_freq * np.pi * 2
 
         for constraint in self.constraints.values():
-            if type(constraint)==fixed_end_type:
+            if type(constraint) == fixed_end_type:
                 origin_constraint_id = constraint.id
                 break
         if origin_constraint_id == None:
-            logger.error("No Fixed End found in figure, please specify origin_constraint_id") 
-        
+            logger.error(
+                "No Fixed End found in figure, please specify origin_constraint_id"
+            )
+
         _ = self.get_params_solution(natural_freq=natural_freq)
         constraint_curr = self.constraints[origin_constraint_id]
         member_curr = constraint_curr.members[0]
 
-        #Initialising values
+        # Initialising values
         offset = np.array([0, 0])
         angle = 0
         Handle = True
         mode_shape = [np.matrix([[0], [0]]).reshape(1, 2)]
+        original_shape = [np.matrix([[0], [0]]).reshape(1, 2)]
         members_completed = set()
         constraints_completed = set()
 
@@ -313,21 +325,31 @@ class frame:
             v, u = member_curr.get_deformation(
                 w=omega, lengths=x, id=constraint_curr.id, subs_dict=self.params_subs
             )
-            v = v*scaling_factor
-            u = u*scaling_factor
+            v = v * scaling_factor
+            u = u * scaling_factor
             x_deformed = np.real(u).reshape(len(x)) + x
             y_deformed = np.real(v).T
-            points_deformed = np.stack([x_deformed, y_deformed]).T.reshape(len(x), 1, 2)
+            points_deformed = np.stack([x_deformed, y_deformed]).T.reshape(len(x), 2)
+            points_original = np.stack([x, np.zeros(len(x))]).T.reshape(len(x), 2)
 
             # Converting local coordinates to global coordinates
             rotation_matrix = np.array(
                 [[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]]
             )
-            rotated = np.matmul(rotation_matrix,points_deformed.T).T
-            rotated_translated = rotated + offset
-            mode_shape.append(rotated_translated)
+            deformation_rotated = np.matmul(rotation_matrix, points_deformed.T).T
+            deformation_rotated_translated = deformation_rotated + offset
 
-            offset = offset + np.array(np.matmul(rotation_matrix,np.array([member_curr.length,0])).T).reshape(2,)
+            original_rotated = np.matmul(rotation_matrix, points_original.T).T
+            original_rotated_translated = original_rotated + offset
+
+            mode_shape.append(deformation_rotated_translated)
+            original_shape.append(original_rotated_translated)
+
+            offset = offset + np.array(
+                np.matmul(rotation_matrix, np.array([member_curr.length, 0])).T
+            ).reshape(
+                2,
+            )
 
             constraint_ids = member_curr.constraint_ids
             if constraint_ids[0] not in constraints_completed:
@@ -337,7 +359,9 @@ class frame:
 
             angle = constraint_curr.theta
 
-            members = constraint_curr.members  # Will have to change for a 3 member joint
+            members = (
+                constraint_curr.members
+            )  # Will have to change for a 3 member joint
 
             if members[0].id not in members_completed:
                 member_curr = members[0]
@@ -345,9 +369,12 @@ class frame:
                 member_curr = members[1]
             else:
                 Handle = False
-            
+
         mode_shape = np.concatenate(mode_shape)
-        x_plot = mode_shape[: , 0]
-        y_plot = mode_shape[:, 1]
-        plt.plot(x_plot, y_plot)
+        original_shape = np.concatenate(original_shape)
+
+        plt.plot(mode_shape[:, 0], mode_shape[:, 1])
+        plt.plot(original_shape[:, 0], original_shape[:, 1], "--")
+        plt.legend(["Mode Shape", "Original Shape"])
+
         return np.array(mode_shape)

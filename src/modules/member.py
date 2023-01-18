@@ -142,12 +142,10 @@ class member:
     ) -> List[np.ndarray]:
         lengths = np.array(lengths)
 
-        a_minus, a_plus = self.get_parameters(w=w,id=id)
+        a_minus, a_plus = self.get_parameters(w=w, id=id)
         # a_minus, a_plus = (self.a_minus, self.a_plus)
 
-        propagation_matrix_subs = self.get_propagation_matrix(
-            w=w, lengths=lengths
-        )
+        propagation_matrix_subs = self.get_propagation_matrix(w=w, lengths=lengths)
         propagation_matrix_inv_subs = np.linalg.inv(propagation_matrix_subs)
         a_plus_subs = np.matrix(a_plus.subs(subs_dict), dtype=complex)
         a_minus_subs = np.matrix(a_minus.subs(subs_dict), dtype=complex)

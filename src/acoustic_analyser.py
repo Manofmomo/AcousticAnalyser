@@ -1,5 +1,6 @@
 from src.modules import joint, bc
 from src.modules.bc import bc as bc_type
+from src.modules.bc import fixed_end as fixed_end_type
 from src.modules.joint import joint as joint_type
 from sympy.core.add import Add as equation_type
 from sympy import symbols, Matrix
@@ -266,16 +267,87 @@ class frame:
 
     def get_params_solution(self, natural_freq, atol=1e-05, rtol=1e-05) -> Dict:
         """Using the natural frequncy and computes the parameters by finding eigenvector for the eigenvalue 0"""
-        # matrix = self.get_equation_matrix(w=2 * np.pi * natural_freq)
-        # val, vec = eigs(matrix, k=1, sigma=0)
-        # val = val[0]
 
-        val, vec = np.linalg.eig(self.get_equation_matrix(w=2 * np.pi * 13.742))
+        val, vec = np.linalg.eig(self.get_equation_matrix(w=2 * np.pi * natural_freq))
         solns = vec[:, np.abs(val).argmin()]
 
         assert (
             np.isclose(val[np.abs(val).argmin()], 0, atol=atol, rtol=rtol) == True
         ), "The value provided is not a natural frequency"
 
-        self.params_subs = dict(zip(self.params, solns / 2))
+        self.params_subs = dict(zip(self.params, solns))
         return self.params_subs
+
+    def get_mode_shape(self, natural_freq : float, origin_constraint_id:int = None , step_size:float=0.01, scaling_factor:float=0.5) -> np.array:
+        "Finds the mode shape of the frame and plots it"
+        omega = natural_freq * np.pi * 2
+
+        for constraint in self.constraints.values():
+            if type(constraint)==fixed_end_type:
+                origin_constraint_id = constraint.id
+                break
+        if origin_constraint_id == None:
+            logger.error("No Fixed End found in figure, please specify origin_constraint_id") 
+        
+        _ = self.get_params_solution(natural_freq=natural_freq)
+        constraint_curr = self.constraints[origin_constraint_id]
+        member_curr = constraint_curr.members[0]
+
+        #Initialising values
+        offset = np.array([0, 0])
+        angle = 0
+        Handle = True
+        mode_shape = [np.matrix([[0], [0]]).reshape(1, 2)]
+        members_completed = set()
+        constraints_completed = set()
+
+        while Handle:
+            # Set of completed members and constraints to prevent loop
+            members_completed.add(member_curr.id)
+            constraints_completed.add(constraint_curr.id)
+
+            # Points along memmber in its local coordinate system
+            x = np.append(
+                np.arange(step_size, member_curr.length, step_size), member_curr.length
+            )
+            v, u = member_curr.get_deformation(
+                w=omega, lengths=x, id=constraint_curr.id, subs_dict=self.params_subs
+            )
+            v = v*scaling_factor
+            u = u*scaling_factor
+            x_deformed = np.real(u).reshape(len(x)) + x
+            y_deformed = np.real(v).T
+            points_deformed = np.stack([x_deformed, y_deformed]).T.reshape(len(x), 1, 2)
+
+            # Converting local coordinates to global coordinates
+            rotation_matrix = np.array(
+                [[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]]
+            )
+            rotated = np.matmul(rotation_matrix,points_deformed.T).T
+            rotated_translated = rotated + offset
+            mode_shape.append(rotated_translated)
+
+            offset = offset + np.array(np.matmul(rotation_matrix,np.array([member_curr.length,0])).T).reshape(2,)
+
+            constraint_ids = member_curr.constraint_ids
+            if constraint_ids[0] not in constraints_completed:
+                constraint_curr = self.constraints[constraint_ids[0]]
+            else:
+                constraint_curr = self.constraints[constraint_ids[1]]
+
+            angle = constraint_curr.theta
+
+            members = constraint_curr.members  # Will have to change for a 3 member joint
+
+            if members[0].id not in members_completed:
+                member_curr = members[0]
+            elif len(members) > 1 and members[1] not in members_completed:
+                member_curr = members[1]
+            else:
+                Handle = False
+            
+        mode_shape = np.concatenate(mode_shape)
+        x_plot = mode_shape[: , 0]
+        y_plot = mode_shape[:, 1]
+        plt.plot(x_plot, y_plot)
+        return np.array(mode_shape)

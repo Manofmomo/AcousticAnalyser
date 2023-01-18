@@ -139,17 +139,18 @@ class member:
 
     def get_deformation(
         self, w: float, lengths: List[float], subs_dict: dict, id: int
-    ) -> List[float]:
+    ) -> List[np.ndarray]:
         lengths = np.array(lengths)
-        # if id == max(self.constraint_ds):
-        #     lengths = self.length - lenigths
+
+        a_minus, a_plus = self.get_parameters(w=w,id=id)
+        # a_minus, a_plus = (self.a_minus, self.a_plus)
 
         propagation_matrix_subs = self.get_propagation_matrix(
-            w=2 * np.pi * 13.742, lengths=lengths
+            w=w, lengths=lengths
         )
         propagation_matrix_inv_subs = np.linalg.inv(propagation_matrix_subs)
-        a_plus_subs = np.matrix(self.a_plus.subs(subs_dict), dtype=complex)
-        a_minus_subs = np.matrix(self.a_minus.subs(subs_dict), dtype=complex)
+        a_plus_subs = np.matrix(a_plus.subs(subs_dict), dtype=complex)
+        a_minus_subs = np.matrix(a_minus.subs(subs_dict), dtype=complex)
         v = (
             np.matmul(np.array([1, 1, 0]), propagation_matrix_subs) * a_plus_subs
             + np.matmul(np.array([1, 1, 0]), propagation_matrix_inv_subs) * a_minus_subs

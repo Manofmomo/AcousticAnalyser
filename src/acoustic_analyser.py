@@ -335,19 +335,31 @@ class frame:
             x_deformed_negative = -np.real(u).reshape(len(x)) + x
             y_deformed_negative = -np.real(v).T
 
-            points_deformed_positive = np.stack([x_deformed_positive, y_deformed_positive]).T.reshape(len(x), 2)
-            points_deformed_negative = np.stack([x_deformed_negative, y_deformed_negative]).T.reshape(len(x), 2)
+            points_deformed_positive = np.stack(
+                [x_deformed_positive, y_deformed_positive]
+            ).T.reshape(len(x), 2)
+            points_deformed_negative = np.stack(
+                [x_deformed_negative, y_deformed_negative]
+            ).T.reshape(len(x), 2)
             points_original = np.stack([x, np.zeros(len(x))]).T.reshape(len(x), 2)
 
             # Converting local coordinates to global coordinates
             rotation_matrix = np.array(
                 [[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]]
             )
-            deformation_rotated_positive = np.matmul(rotation_matrix, points_deformed_positive.T).T
-            deformation_rotated_translated_positive = deformation_rotated_positive + offset
+            deformation_rotated_positive = np.matmul(
+                rotation_matrix, points_deformed_positive.T
+            ).T
+            deformation_rotated_translated_positive = (
+                deformation_rotated_positive + offset
+            )
 
-            deformation_rotated_negative = np.matmul(rotation_matrix, points_deformed_negative.T).T
-            deformation_rotated_translated_negative = deformation_rotated_negative + offset
+            deformation_rotated_negative = np.matmul(
+                rotation_matrix, points_deformed_negative.T
+            ).T
+            deformation_rotated_translated_negative = (
+                deformation_rotated_negative + offset
+            )
 
             original_rotated = np.matmul(rotation_matrix, points_original.T).T
             original_rotated_translated = original_rotated + offset
@@ -368,7 +380,8 @@ class frame:
             else:
                 constraint_curr = self.constraints[constraint_ids[1]]
 
-            angle = constraint_curr.theta
+            angle = angle + constraint_curr.theta
+            angle = np.mod(angle, 2 * np.pi)
 
             members = (
                 constraint_curr.members
@@ -385,11 +398,11 @@ class frame:
         mode_shape_negative = np.concatenate(mode_shape_negative)
         original_shape = np.concatenate(original_shape)
 
-        plt.plot(mode_shape_positive[:, 0], mode_shape_positive[:, 1],'b')
+        plt.plot(mode_shape_positive[:, 0], mode_shape_positive[:, 1], "b")
         plt.plot(original_shape[:, 0], original_shape[:, 1], "r--")
-        plt.plot(mode_shape_negative[:, 0], mode_shape_negative[:, 1],'b')
-        plt.legend(["Mode Shape","Original Shape"])
+        plt.plot(mode_shape_negative[:, 0], mode_shape_negative[:, 1], "b")
+        plt.legend(["Mode Shape", "Original Shape"])
         plt.xticks([])
         plt.yticks([])
 
-        return np.array(mode_shape_positive),np.array(mode_shape_negative)
+        return np.array(mode_shape_positive), np.array(mode_shape_negative)

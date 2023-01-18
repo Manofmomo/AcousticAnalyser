@@ -10,5 +10,17 @@
     "density": 7800,
     "height": 1.27e-2,
     "length": 0.5
+  },
+  "2": {
+    "youngs_modulus": 206e9,
+    "density": 7800,
+    "height": 1.27e-2,
+    "length": 0.5
+  },
+  "3": {
+    "youngs_modulus": 206e9,
+    "density": 7800,
+    "height": 1.27e-2,
+    "length": 0.5
   }
 }

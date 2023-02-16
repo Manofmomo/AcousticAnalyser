@@ -1,4 +1,4 @@
-from acoustic_analyser.acoustic_analyser import frame
+from acoustic_analyser import frame
 import numpy as np
 from scipy.optimize import newton
 

@@ -49,6 +49,7 @@ class frame:
 
     @classmethod
     def from_file(cls, member_file: str, constraint_file: str, debug: bool = False):
+        """Defines a frame from a constraint file and a member file."""
         obj = cls(debug)
 
         with open(member_file, "r") as jsonfile:

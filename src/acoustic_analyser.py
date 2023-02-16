@@ -11,8 +11,6 @@ import logging
 from typing import Dict, List, Union
 import numpy as np
 from matplotlib import pyplot as plt
-from scipy.sparse.linalg import eigs
-import itertools
 from scipy.optimize import newton
 
 logging.basicConfig(
@@ -405,4 +403,8 @@ class frame:
         plt.xticks([])
         plt.yticks([])
 
-        return np.array(mode_shape_positive), np.array(mode_shape_negative)
+        return (
+            np.array(mode_shape_positive),
+            np.array(mode_shape_negative),
+            np.array(original_shape),
+        )

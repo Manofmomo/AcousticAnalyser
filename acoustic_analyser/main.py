@@ -1,10 +1,10 @@
-from src.modules import joint, bc
-from src.modules.bc import bc as bc_type
-from src.modules.bc import fixed_end as fixed_end_type
-from src.modules.joint import joint as joint_type
+from acoustic_analyser.modules import joint, bc
+from acoustic_analyser.modules.bc import bc as bc_type
+from acoustic_analyser.modules.bc import fixed_end as fixed_end_type
+from acoustic_analyser.modules.joint import joint as joint_type
 from sympy.core.add import Add as equation_type
 from sympy import symbols, Matrix
-from src.modules.member import member as member_type
+from acoustic_analyser.modules.member import member as member_type
 from json import load as json_load
 from csv import reader as csv_load
 import logging

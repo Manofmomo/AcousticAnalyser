@@ -1,6 +1,6 @@
 from asyncio.log import logger
-from src.modules.member import member as member_type
-from src.modules.rt_joint import get_rt_of_cross_section
+from acoustic_analyser.modules.member import member as member_type
+from acoustic_analyser.modules.rt_joint import get_rt_of_cross_section
 from sympy import Matrix
 from typing import List
 from math import pi

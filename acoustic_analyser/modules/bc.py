@@ -1,5 +1,5 @@
-from src.modules.member import member as member_type
-from src.modules.rt_bc import get_r_of_fixed_end, get_r_of_free_end
+from acoustic_analyser.modules.member import member as member_type
+from acoustic_analyser.modules.rt_bc import get_r_of_fixed_end, get_r_of_free_end
 from sympy import Matrix
 import logging
 from typing import List

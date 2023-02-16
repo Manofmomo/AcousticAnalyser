@@ -8,7 +8,7 @@
             "name": "Python: Module",
             "type": "python",
             "request": "launch",
-            "module": "src.acoustic_analyser",
+            "module": "acoustic_analyser.acoustic_analyser",
             "justMyCode": true
         }
     ]

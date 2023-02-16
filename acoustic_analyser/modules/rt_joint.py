@@ -1,7 +1,7 @@
 from sympy import symbols, I, Matrix
 from sympy.core.parameters import evaluate
 from pickle import load as pickle_load
-from src.modules.member import member as member_type
+from acoustic_analyser.modules.member import member as member_type
 from typing import List, Tuple
 import logging
 
@@ -15,7 +15,7 @@ density2, area2, E2, I2, L2, H2 = symbols("density2, area2, E2, I2, L2, H2")
 theta_sym = symbols("theta")
 w_sym = symbols("w")
 
-file = open("src/equations/cross_section", mode="rb")
+file = open("acoustic_analyser/equations/cross_section", mode="rb")
 eqns = pickle_load(file)
 logger.debug("Joint Equation Files Loaded")
 file.close()

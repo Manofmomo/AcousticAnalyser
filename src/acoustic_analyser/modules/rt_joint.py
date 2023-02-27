@@ -4,6 +4,7 @@ from pickle import load as pickle_load
 from acoustic_analyser.modules.member import member as member_type
 from typing import List, Tuple
 import logging
+import os
 
 logger = logging.getLogger("acoustic_analyser")
 
@@ -15,7 +16,8 @@ density2, area2, E2, I2, L2, H2 = symbols("density2, area2, E2, I2, L2, H2")
 theta_sym = symbols("theta")
 w_sym = symbols("w")
 
-file = open("acoustic_analyser/equations/cross_section", mode="rb")
+base_path = os.path.join(os.path.dirname(__file__), "..", "equations")
+file = open(os.path.join(base_path, "cross_section.pkl"), mode="rb")
 eqns = pickle_load(file)
 logger.debug("Joint Equation Files Loaded")
 file.close()

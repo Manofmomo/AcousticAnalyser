@@ -107,19 +107,19 @@ def get_equation_cross() -> Tuple[sympy.Matrix]:
 
 if __name__ == "__main__":
     obj = get_equation_cross()
-    filehandler = open("equations/cross_section", "wb")
+    filehandler = open("equations/cross_section.pkl", "wb")
     pickle.dump(obj, filehandler)
     filehandler.close()
     logger.debug("cross_section generated")
 
     obj = get_equation_free_end()
-    filehandler = open("equations/free_end", "wb")
+    filehandler = open("equations/free_end.pkl", "wb")
     pickle.dump(obj, filehandler)
     filehandler.close()
     logger.debug("free_end generated")
 
     obj = get_equation_fixed_end()
-    filehandler = open("equations/fixed_end", "wb")
+    filehandler = open("equations/fixed_end.pkl", "wb")
     pickle.dump(obj, filehandler)
     filehandler.close()
     logger.debug("fixed_end generated")

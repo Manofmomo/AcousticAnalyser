@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: acoustic-analyser
-Version: 0.0.7
+Version: 0.0.6
 Summary: An Open Source package to perform nodal analysis on simple 2D structures using wave based approach
 Home-page: https://github.com/Manofmomo/AcousticAnalyser
 Author: Dhruv Bhatia, Dr. Abhijit Sarkar

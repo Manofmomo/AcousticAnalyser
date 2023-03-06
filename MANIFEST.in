@@ -1,0 +1,1 @@
+include src/acoustic_analyser/equations/*.pkl

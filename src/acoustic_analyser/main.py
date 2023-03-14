@@ -185,7 +185,7 @@ class frame:
 
         for i in range(len(freq)):
             output[i] = self.get_determinant(w=omega[i])
-            print(f"{i}/{len(freq)}\t", end="\r")
+            print(f"{i}/{len(freq)}", " " * 10, end="\r")
 
         plt.plot(freq, np.real(output))
         plt.plot(freq, np.imag(output))
@@ -210,21 +210,19 @@ class frame:
         )
         return np.abs(newton(get_determinant, initial_guess, tol=tol, maxiter=max_iter))
 
-    def get_natural_frequency_bisect(
+    def get_natural_frequency(
         self,
-        lower_limit: float,
-        upper_limit: float,
-        precision: float = 0.01,
-        max_iter: int = 100,
-    ) -> float:
-        """Takes in the upper and lower limit of frequency between which it searches for the natural frequency of the structure.
-        The natural frequency must lie between the two limits.
-        """
-        freq_1 = lower_limit
-        freq_2 = upper_limit
+        n: int = 1,
+        lower_limit: float = 0,
+        upper_limit: float = 1000,
+        step_size: float = 1,
+        atol=1e-08,
+        rtol=1e-05,
+    ) -> List[float]:
+        natural_frequencies = []
 
-        iter = 0
-        Handle = True
+        freq_1 = lower_limit
+        freq_2 = lower_limit + step_size
         omega = lambda freq: freq * np.pi * 2
 
         def sign_check(output_1: complex, output_2: complex) -> bool:
@@ -238,34 +236,46 @@ class frame:
         output_1 = self.get_determinant(w=omega(freq=freq_1))
         output_2 = self.get_determinant(w=omega(freq=freq_2))
 
-        while Handle:
-            iter = iter + 1
-            if iter > max_iter:
-                Handle = False
+        # Implemented the bisect method
+        while n > 0 and freq_1 < upper_limit:
+            print(f"Checking region [{freq_1}, {freq_2}]", " " * 10, end="\r")
+            if sign_check(output_1, output_2):
+                print(f"\nPossible root in region [{freq_1}, {freq_2}]")
+                max_iter = 100
+                root_found = False
+                counter = 0
+                x1 = freq_1
+                x2 = freq_2
+                while counter < max_iter:
+                    counter = counter + 1
+                    x = (x1 + x2) / 2
+                    output = self.get_determinant(w=omega(freq=x))
+                    if np.isclose(output, 0, atol=atol, rtol=rtol):
+                        natural_frequencies.append(x)
+                        n = n - 1
+                        root_found = True
+                        break
 
-            freq_12 = (freq_1 + freq_2) / 2
-            output_12 = self.get_determinant(w=omega(freq=freq_12))
-
-            if np.isclose(abs(output_12), 0) or (freq_2 - freq_1) < precision:
-                Handle = False
-
-            if sign_check(output_1, output_12):
-                freq_2 = freq_12
-            elif sign_check(output_2, output_12):
-                freq_1 = freq_12
-            else:
-                logger.error("There is no solution between these points")
-                Handle = False
-                return None
-
-            output_1 = self.get_determinant(w=omega(freq=freq_1))
+                    if sign_check(output_1, output):
+                        x2 = x
+                    elif sign_check(output_2, output):
+                        x1 = x
+                    else:
+                        break
+                    print(
+                        f"Iteration: {counter}, Det: {abs(output)}, freq: {x}", end="\r"
+                    )
+                print(" " * 100, end="\r")
+                if not root_found:
+                    print(f"Natural frequency not found in range, continuing")
+                else:
+                    print(f"Natural frequency found at {x}")
+            freq_1 = freq_2
+            freq_2 = freq_2 + step_size
+            output_1 = output_2
             output_2 = self.get_determinant(w=omega(freq=freq_2))
 
-            print(
-                f"Iteration: {iter}, Det: {abs(output_12)}, freq: {freq_12}\t", end="\r"
-            )
-
-        return (freq_1 + freq_2) / 2
+        return natural_frequencies
 
     def get_params_solution(self, natural_freq, atol=1e-05, rtol=1e-05) -> Dict:
         """Using the natural frequncy and computes the parameters by finding eigenvector for the eigenvalue 0"""
@@ -282,12 +292,22 @@ class frame:
 
     def get_mode_shape(
         self,
-        natural_freq: float,
+        n: int = None,
+        natural_freq: float = None,
         origin_constraint_id: int = None,
         step_size: float = 0.01,
         scaling_factor: float = 0.5,
     ) -> np.array:
         "Finds the mode shape of the frame and plots it"
+        if (n is None) and (natural_freq is None):
+            logger.error(
+                "Either n or natural frequency must be provided in order to find the mode shape"
+            )
+        if natural_freq is None:
+            print("Beginning search for Natural Frequency")
+            natural_freqs = self.get_natural_frequency(n=n)
+            natural_freq = natural_freqs[-1]
+            print(f"Natural Frequency for {n} mode shape is {natural_freq}")
         omega = natural_freq * np.pi * 2
 
         for constraint in self.constraints.values():

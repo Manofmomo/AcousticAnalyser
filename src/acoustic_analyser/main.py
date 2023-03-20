@@ -303,6 +303,7 @@ class frame:
             logger.error(
                 "Either n or natural frequency must be provided in order to find the mode shape"
             )
+            return None
         if natural_freq is None:
             print("Beginning search for Natural Frequency")
             natural_freqs = self.get_natural_frequency(n=n)
@@ -318,6 +319,7 @@ class frame:
             logger.error(
                 "No Fixed End found in figure, please specify origin_constraint_id"
             )
+            return None
 
         _ = self.get_params_solution(natural_freq=natural_freq)
         constraint_curr = self.constraints[origin_constraint_id]

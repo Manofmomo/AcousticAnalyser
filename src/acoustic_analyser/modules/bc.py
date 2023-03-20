@@ -46,7 +46,7 @@ class fixed_end(bc):
         super().__init__(member=member, id=id)
         self.reflection_matrix = get_r_of_fixed_end(m1=member)
 
-        logger.debug(f"Reflection Matrix for free_end {self.id} calculated")
+        logger.debug(f"Reflection Matrix for fixed_end {self.id} calculated")
 
     def get_equations(self, w: float) -> list:
         """Gets the equations from the reflection and transmission matrices"""

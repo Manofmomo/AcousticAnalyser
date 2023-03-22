@@ -2,6 +2,7 @@ from sympy import symbols, Matrix, I, E
 import logging
 from typing import List
 import numpy as np
+import bisect 
 
 logger = logging.getLogger("acoustic_analyser")
 
@@ -43,6 +44,9 @@ class member:
         self.constraint_count = 0
         self.constraint_ids = []
 
+        self.force_counter=0
+        self.force_pos = []
+
         self.set_parameters()
 
     def check_constraint_count(self) -> bool:
@@ -57,6 +61,45 @@ class member:
 
     def add_constraint(self, id):
         self.constraint_ids.append(id)
+
+    def create_force_parameters(self) -> List[symbols]:
+
+        g1_b_plus, g1_e_plus, g1_b_minus, g1_e_minus, g1_l_plus, g1_l_minus = symbols(
+            "g_{f}b^+{i}, g_{f}e^+{i}, g_{f}b^-{i}, g_{f}e^-{i}, g_{f}l^+{i}, g_{f}l^-{i}".format(
+                i=self.id, f = self.force_counter*2-1
+            )
+        )
+        g1_plus = Matrix([g1_b_plus, g1_e_plus, g1_l_plus])
+        g1_minus = Matrix([g1_b_minus, g1_e_minus, g1_l_minus])
+
+        g2_b_plus, g2_e_plus, g2_b_minus, g2_e_minus, g2_l_plus, g2_l_minus = symbols(
+            "g_{f}b^+{i}, g_{f}e^+{i}, g_{f}b^-{i}, g_{f}e^-{i}, g_{f}l^+{i}, g_{f}l^-{i}".format(
+                i=self.id, f = self.force_counter*2
+            )
+        )
+        g2_plus = Matrix([g2_b_plus, g2_e_plus, g2_l_plus])
+        g2_minus = Matrix([g2_b_minus, g2_e_minus, g2_l_minus])
+        
+        return [g1_plus, g1_minus, g2_plus, g2_minus]
+
+
+    def add_force(self, constraint_id: int, force: float, x: float):
+        """Allows adding forced to members for forced vibration"""
+        if x>=self.length or x<=0:
+            raise ValueError("force lies outside the member")
+        if x in self.force_pos:
+            raise ValueError("point already has forces acting on it")
+        
+        self.force_counter = self.force_counter + 1
+        # Correct for the sign convention
+        if constraint_id == max(self.constraint_ids):
+            x=self.length-x
+
+        force_params = self.create_force_parameters()
+
+        index = bisect.bisect_left(self.force_pos,x)
+        self.force_pos.insert(index,x)
+        self.params = self.params[:index*4+2] + force_params + self.params[index*4+2:]
 
     def get_propagation_matrix(self, w: float, lengths: List[float]):
         length = np.array(lengths)
@@ -87,30 +130,19 @@ class member:
                 i=self.id
             )
         )
-        self.params = [
-            a_b_plus,
-            a_e_plus,
-            a_l_plus,
-            a_b_minus,
-            a_e_minus,
-            a_l_minus,
-            b_b_plus,
-            b_e_plus,
-            b_l_plus,
-            b_b_minus,
-            b_e_minus,
-            b_l_minus,
-        ]
 
         self.a_plus = Matrix([a_b_plus, a_e_plus, a_l_plus])
         self.a_minus = Matrix([a_b_minus, a_e_minus, a_l_minus])
 
         self.b_plus: Matrix = Matrix([b_b_plus, b_e_plus, b_l_plus])
         self.b_minus: Matrix = Matrix([b_b_minus, b_e_minus, b_l_minus])
+    
+        self.params = [self.a_plus, self.a_minus, self.b_plus, self.b_minus]
         logger.debug(f"Parameters set for member {self.id}")
 
     def get_all_parameters(self) -> List[symbols]:
-        return self.params
+        # Flatten out parameters
+        return [param for sublist in self.params for param in sublist]
 
     def get_parameters(self, w: float, id: int) -> list:
         """This function gives back the set of parameters to be used.
@@ -124,14 +156,28 @@ class member:
             return [self.a_minus, self.a_plus]
 
     def get_equations(self, w: float):
-        self.propagation_matrix_subs = self.get_propagation_matrix(
-            w=w, lengths=[self.length]
-        )[0]
-        matrix_forward = self.propagation_matrix_subs * self.a_plus - self.b_plus
-        matrix_backward = self.propagation_matrix_subs * self.b_minus - self.a_minus
-        logger.debug(f"Propagation for id:{self.id} calculated")
-        eqns = matrix_forward.col_join(matrix_backward)
-        return eqns
+
+        if len(self.force_pos)==0:
+            propagation_matrix_subs = self.get_propagation_matrix(
+                w=w, lengths=[self.length]
+            )[0]
+            matrix_forward = propagation_matrix_subs * self.a_plus - self.b_plus
+            matrix_backward = propagation_matrix_subs * self.b_minus - self.a_minus
+            logger.debug(f"Propagation for id:{self.id} calculated")
+            eqns = matrix_forward.col_join(matrix_backward)
+            return eqns
+        
+        else:
+            for i in range(self.force_counter):
+                x = self.force_pos[i]
+                propagation_matrix_subs = self.get_propagation_matrix(
+                w=w, lengths=[x]
+                )[0]
+                first_plus,first_minus,second_plus,second_minus, third_plus, third_minus = self.params[i*4:i*4+6]
+                matrix_forward = propagation_matrix_subs * first_plus - second_plus
+                matrix_backward = propagation_matrix_subs * second_minus - first_minus
+                # matrix_force = 
+
 
     def get_non_dimensional_freq(self, w: float) -> float:
         omega = (w * self.K / self.C) ** 0.5

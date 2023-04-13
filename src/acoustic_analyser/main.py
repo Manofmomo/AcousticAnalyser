@@ -80,6 +80,8 @@ class frame:
         density: float,
         youngs_modulus: float,
         height: float,
+        cross_section_area: float,
+        inertia: float,
         id: int,
     ) -> member_type:
         """This function allows the user to add a member to the structure"""
@@ -87,8 +89,10 @@ class frame:
             length=length,
             density=density,
             youngs_modulus=youngs_modulus,
-            height=height,
+            cross_section_area=cross_section_area,
+            inertia=inertia,
             omega=self.omega,
+            height=height,
             id=id,
         )
         self.members[id] = member_obj
@@ -203,10 +207,11 @@ class frame:
         initial_guess: float,
         tol: float = 1e-09,
         max_iter: int = 100,
+        print_det: bool = True,
     ) -> float:
         """Takes in the a initial guess and uses newton raphson method to solve for natural frequency"""
         get_determinant = lambda x: self.get_determinant(
-            w=np.abs(x) * 2 * np.pi, print_det=True
+            w=np.abs(x) * 2 * np.pi, print_det=print_det
         )
         return np.abs(newton(get_determinant, initial_guess, tol=tol, maxiter=max_iter))
 

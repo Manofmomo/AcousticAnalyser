@@ -46,6 +46,7 @@ class member:
 
         self.force_counter=0
         self.force_pos = []
+        self.force = {}
 
         self.set_parameters()
 
@@ -83,7 +84,7 @@ class member:
         return [g1_plus, g1_minus, g2_plus, g2_minus]
 
 
-    def add_force(self, constraint_id: int, force: float, x: float):
+    def add_force(self, constraint_id: int, Q: float = 0.0, M:float = 0.0, F:float =0.0, x: float):
         """Allows adding forced to members for forced vibration"""
         if x>=self.length or x<=0:
             raise ValueError("force lies outside the member")
@@ -100,6 +101,8 @@ class member:
         index = bisect.bisect_left(self.force_pos,x)
         self.force_pos.insert(index,x)
         self.params = self.params[:index*4+2] + force_params + self.params[index*4+2:]
+
+        self.force[x]={"Q":Q,"M":M,"F":F}
 
     def get_propagation_matrix(self, w: float, lengths: List[float]):
         length = np.array(lengths)
@@ -155,6 +158,15 @@ class member:
         else:
             return [self.a_minus, self.a_plus]
 
+    def get_forced_params(self, Q:float,F:float,M:float, w:float):
+        alpha = (w * self.K / self.C) ** 0.5
+        beta = w * self.K / self.C
+
+        q = (Q/(4*self.youngs_modulus*self.cross_section_area))*(1/(4*(alpha**3)))*Matrix([[I], [1], [0]])
+        m = (M/(4*self.youngs_modulus*self.cross_section_area*self.K))*(1/(4*(alpha**2)))*Matrix([[1], [-1], [0]])
+        f = (F/(2*self.youngs_modulus*self.cross_section_area))*(1/(2*beta))*Matrix([[0], [0], [I]])
+        return q,m,f
+
     def get_equations(self, w: float):
 
         if len(self.force_pos)==0:
@@ -168,16 +180,20 @@ class member:
             return eqns
         
         else:
+            eqns =  Matrix()
+            logger.debug(f"Using forced equations for member:{self.id}")
             for i in range(self.force_counter):
                 x = self.force_pos[i]
                 propagation_matrix_subs = self.get_propagation_matrix(
                 w=w, lengths=[x]
                 )[0]
                 first_plus,first_minus,second_plus,second_minus, third_plus, third_minus = self.params[i*4:i*4+6]
-                matrix_forward = propagation_matrix_subs * first_plus - second_plus
-                matrix_backward = propagation_matrix_subs * second_minus - first_minus
-                # matrix_force = 
-
+                eqns = eqns.col_join(propagation_matrix_subs * first_plus - second_plus)
+                eqns = eqns.col_join(propagation_matrix_subs * second_minus - first_minus)
+                q,m,f = self.get_forced_params(w=w,**self.force[x])
+                eqns = eqns.col_join(third_plus - second_plus -(q+m-f))
+                eqns = eqns.col_join(third_minus - second_minus -(-q+m+f))
+            return eqns
 
     def get_non_dimensional_freq(self, w: float) -> float:
         omega = (w * self.K / self.C) ** 0.5

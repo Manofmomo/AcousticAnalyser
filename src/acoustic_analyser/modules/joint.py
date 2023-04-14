@@ -1,6 +1,6 @@
 from asyncio.log import logger
 from acoustic_analyser.modules.member import member as member_type
-from acoustic_analyser.modules.rt_joint import get_rt_of_cross_section
+from acoustic_analyser.modules.rt_joint import get_rt_of_two_member
 from sympy import Matrix
 from typing import List
 from math import pi
@@ -43,7 +43,7 @@ class two_member(joint):
             self.reflection_matrix_22,
             self.transmission_matrix_12,
             self.transmission_matrix_21,
-        ) = get_rt_of_cross_section(
+        ) = get_rt_of_two_member(
             m1=self.members[0], m2=self.members[1], theta=self.theta, w=w
         )
 

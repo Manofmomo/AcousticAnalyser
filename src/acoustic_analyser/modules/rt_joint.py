@@ -17,7 +17,7 @@ theta_sym = symbols("theta")
 w_sym = symbols("w")
 
 base_path = os.path.join(os.path.dirname(__file__), "..", "equations")
-file = open(os.path.join(base_path, "cross_section.pkl"), mode="rb")
+file = open(os.path.join(base_path, "two_member.pkl"), mode="rb")
 eqns = pickle_load(file)
 logger.debug("Joint Equation Files Loaded")
 file.close()
@@ -78,7 +78,7 @@ def _get_soln(eqns: List[Matrix]) -> Tuple[Matrix]:
     )
 
 
-def get_rt_of_cross_section(
+def get_rt_of_two_member(
     m1: member_type, m2: member_type, theta: float, w: float
 ) -> tuple:
     global eqns

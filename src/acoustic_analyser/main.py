@@ -224,6 +224,7 @@ class frame:
         atol=1e-08,
         rtol=1e-05,
     ) -> List[float]:
+        """Returns the first n natural frequencies by using the bisect method at each step between the lower and upper limit"""
         natural_frequencies = []
 
         freq_1 = lower_limit
@@ -303,7 +304,11 @@ class frame:
         step_size: float = 0.01,
         scaling_factor: float = 0.5,
     ) -> np.array:
-        "Finds the mode shape of the frame and plots it"
+        """
+        Finds the mode shape of the frame and plots it.
+        Origin constraint id is the id of the constraint (joint/bc) which the user would like at origin. In general, it can be left blank.
+        If origin constraint id is not provided, it fixed a fixed_end as the origin.
+        """
         if (n is None) and (natural_freq is None):
             logger.error(
                 "Either n or natural frequency must be provided in order to find the mode shape"

@@ -26,7 +26,7 @@ def get_equation_fixed_end() -> sympy.Matrix:
     return reflection
 
 
-def get_equation_cross() -> Tuple[sympy.Matrix]:
+def get_equation_two_member() -> Tuple[sympy.Matrix]:
     """Gets the M0-M6 of a joint using the equations derived from mathematica"""
     #%%
     M1 = sympy.Matrix(
@@ -106,11 +106,11 @@ def get_equation_cross() -> Tuple[sympy.Matrix]:
 
 
 if __name__ == "__main__":
-    obj = get_equation_cross()
-    filehandler = open("equations/cross_section.pkl", "wb")
+    obj = get_equation_two_member()
+    filehandler = open("equations/two_member.pkl", "wb")
     pickle.dump(obj, filehandler)
     filehandler.close()
-    logger.debug("cross_section generated")
+    logger.debug("two_member generated")
 
     obj = get_equation_free_end()
     filehandler = open("equations/free_end.pkl", "wb")

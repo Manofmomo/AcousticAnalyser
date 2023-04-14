@@ -1,7 +1,9 @@
 .venv/
+.vscode/
 __pycache__/
 *.py[cod]
 untracked/
 .ipynb_checkpoints/
 build/*
-acoustic
+acoustic_analyser.egg-info/
+src/acoustic_analyser.egg-info

@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name="acoustic_analyser",
-    version="0.0.7",
+    version="0.0.9",
     author="Dhruv Bhatia, Dr. Abhijit Sarkar",
     description="An Open Source package to perform nodal analysis on simple 2D structures using wave based approach",
     long_description=open("README.md").read(),

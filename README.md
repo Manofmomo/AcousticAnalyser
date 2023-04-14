@@ -2,7 +2,7 @@
 An Open Source package to perform nodal analysis on simple 2D structures using wave based approach
 ## Authors
 - [Dhruv Bhatia](https://www.github.com/manofmomo)
-- Dr. Abhijit Sarkar
+- [Dr. Abhijit Sarkar](https://mech.iitm.ac.in/meiitm/personnal/abhijit-sarkar/)
 ## Installation
 ### Pre-requisites:
 * numpy
@@ -25,5 +25,5 @@ You can install tha package through both pip and using the releases present on g
 ```
 
 ## Usage:
-You can find the tutorial to getting started linked in the documentation. 
+You can find the example problems to get started [here](https://github.com/Manofmomo/AcousticAnalyser/blob/master/documentation/documentation.ipynb). 
 
